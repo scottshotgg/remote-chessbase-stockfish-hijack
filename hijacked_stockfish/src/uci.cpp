@@ -210,7 +210,7 @@ void UCI::loop(int argc, char* argv[]) {
     // Change this to a network write later  
     cout << std::string(cmd);
     tunnelString(cmd);
-
+ 
     Json::Value root;   // will contains the root value after parsing.
     Json::Reader reader;
     bool parsingSuccessful = reader.parse(responseData.c_str(), root);
