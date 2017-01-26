@@ -1,1 +1,1 @@
-g++ something.cpp happyhttp.cpp -o something
+g++ something.cpp happyhttp.cpp jsoncpp.cpp -o something

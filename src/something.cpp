@@ -5,24 +5,31 @@
 #include <netdb.h>
 #include "happyhttp.h"
 #include <string>
+#include <json/reader.h>
+#include <iostream>
 
 int counted = 0;
+std::string responseData;
 
 void OnBegin(const happyhttp::Response* r, void* userdata)
 {
-  printf("BEGIN (%d %s)\n\n", r->getstatus(), r->getreason());
+  printf("BEGIN (%d %s)\n", r->getstatus(), r->getreason());
   counted = 0;
 }
 
 void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* data, int n)
 {
-  fwrite(data,1,n, stdout);
+  //fwrite(data, 1, n, stdout);
+  responseData = (char*)data;
+  //printf("%s", responseData);
+
+
   counted += n;
 }
 
 void OnComplete( const happyhttp::Response* r, void* userdata)
 {
-  printf("\n\nCOMPLETE (%d bytes)\n", counted);
+  printf("\nCOMPLETE (%d bytes)\n\n", counted);
 }
 
 void tunnelString() {
@@ -38,8 +45,17 @@ void tunnelString() {
   
 	while(conn.outstanding())
 		conn.pump();
+
+  //printf("This is the response: \n%s\n", responseData.c_str());
+
 }
 
 int main() {
 	tunnelString();
+
+  Json::Value root;   // will contains the root value after parsing.
+  Json::Reader reader;
+  bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+
+  printf(root.get("output", "UTF-8").asString().c_str());
 }
