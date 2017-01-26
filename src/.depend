@@ -36,7 +36,7 @@ timeman.o: timeman.cpp search.h misc.h types.h movepick.h movegen.h \
 tt.o: tt.cpp bitboard.h types.h tt.h misc.h
 uci.o: uci.cpp evaluate.h types.h movegen.h position.h bitboard.h \
   search.h misc.h movepick.h thread.h material.h endgame.h pawns.h \
-  thread_win32.h timeman.h uci.h
+  thread_win32.h timeman.h uci.h happyhttp.h
 ucioption.o: ucioption.cpp misc.h types.h search.h movepick.h movegen.h \
   position.h bitboard.h thread.h material.h endgame.h pawns.h \
   thread_win32.h tt.h uci.h syzygy/tbprobe.h
@@ -44,3 +44,4 @@ tbprobe.o: syzygy/tbprobe.cpp syzygy/../position.h syzygy/../bitboard.h \
   syzygy/../types.h syzygy/../movegen.h syzygy/../search.h \
   syzygy/../misc.h syzygy/../movepick.h syzygy/tbprobe.h syzygy/tbcore.h \
   syzygy/tbcore.cpp
+happyhttp.o: happyhttp.cpp happyhttp.h
