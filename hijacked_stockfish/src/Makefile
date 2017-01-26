@@ -45,7 +45,7 @@ PGOBENCH = ./$(EXE) bench
 OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o \
-	happyhttp.o
+	happyhttp.o jsoncpp.o
 
 ### ==========================================================================
 ### Section 2. High-level Configuration

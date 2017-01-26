@@ -45,3 +45,4 @@ tbprobe.o: syzygy/tbprobe.cpp syzygy/../position.h syzygy/../bitboard.h \
   syzygy/../misc.h syzygy/../movepick.h syzygy/tbprobe.h syzygy/tbcore.h \
   syzygy/tbcore.cpp
 happyhttp.o: happyhttp.cpp happyhttp.h
+jsoncpp.o: jsoncpp.cpp json/json.h

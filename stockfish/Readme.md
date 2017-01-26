@@ -1,3 +1,8 @@
+### ADDDED THIS
+
+Use "make build ARCH=x86-64 COMP=clang -j 10" to make stockfish
+
+
 ### Overview
 
 [![Build Status](https://travis-ci.org/official-stockfish/Stockfish.svg?branch=master)](https://travis-ci.org/official-stockfish/Stockfish)

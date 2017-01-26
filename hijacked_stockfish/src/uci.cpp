@@ -31,11 +31,9 @@
 #include "uci.h"
 
 // User added includes
-#include <sys/types.h> /* See NOTES */ 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include "happyhttp.h"
+#include <string>
+#include <json/reader.h>
 
 using namespace std;
 
@@ -154,57 +152,46 @@ void error(const char *msg)
 }
 
 int counted = 0;
+std::string responseData;
 
-void OnBegin( const happyhttp::Response* r, void* userdata )
+void OnBegin(const happyhttp::Response* r, void* userdata)
 {
-  printf( "BEGIN (%d %s)\n", r->getstatus(), r->getreason() );
+  printf("BEGIN (%d %s)\n", r->getstatus(), r->getreason());
   counted = 0;
 }
 
-void OnData( const happyhttp::Response* r, void* userdata, const unsigned char* data, int n )
+void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* data, int n)
 {
-  fwrite( data,1,n, stdout );
+  //fwrite(data, 1, n, stdout);
+  responseData = (char*)data;
+  //printf("%s", responseData);
+
+
   counted += n;
 }
 
-void OnComplete( const happyhttp::Response* r, void* userdata )
+void OnComplete( const happyhttp::Response* r, void* userdata)
 {
-  printf( "COMPLETE (%d bytes)\n", counted );
+  printf("\nCOMPLETE (%d bytes)\n\n", counted);
 }
 
-void tunnelString(string cmd) {
+void tunnelString(std::string commandToRun) {
 
   happyhttp::Connection conn("127.0.0.1", 5000);
-  conn.setcallbacks( OnBegin, OnData, OnComplete, 0);
+  conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
 
-  cout << "making request";
-  conn.request("PUT", "/something", 0, "can you see this", 0);
+  // Making request
+  printf("making request\n");
+  //const char* cmd = "go depth 10";
+  conn.request("PUT", "/cmd", 0, (const unsigned char*)commandToRun.c_str(), std::strlen(commandToRun.c_str()));
+  //conn.request("PUT", "/something", 0, 0, 0);
+  
+  while(conn.outstanding())
+    conn.pump();
+
+  //printf("This is the response: \n%s\n", responseData.c_str());
 
 }
-
-// void tunnelString() {
-// //void tunnelString(string thing) {
-//   //
-//   struct sockaddr_in serv_addr;
-//   struct hostent *server;
-//   char const *address = "127.0.0.1";
-//   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-//   int portno = 5000;
-//   server = gethostbyname(address);
-//   bzero((char *) &serv_addr, sizeof(serv_addr));
-//   serv_addr.sin_family = AF_INET;
-//   bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
-//   serv_addr.sin_port = htons(portno);
-
-//   cout << "trying to connect...";
-
-//   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
-//         error("ERROR connecting");
-//   //
-// }
-
-
-//void UCI::tunnel(int argc, char* argv[])
 
 void UCI::loop(int argc, char* argv[]) {
   
@@ -222,7 +209,13 @@ void UCI::loop(int argc, char* argv[]) {
 
     // Change this to a network write later  
     cout << std::string(cmd);
-    tunnelString();
+    tunnelString(cmd);
+
+    Json::Value root;   // will contains the root value after parsing.
+    Json::Reader reader;
+    bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+
+    printf(root.get("output", "UTF-8").asString().c_str());
 
     // open a port to the golang instance and ship over the string of commands
     // might need to use a name that will go along with it incase we want to kill it remotely
