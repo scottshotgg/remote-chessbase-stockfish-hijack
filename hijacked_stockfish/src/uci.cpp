@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+//#include <stdio.h>
 
 #include "evaluate.h"
 #include "movegen.h"
@@ -31,9 +32,9 @@
 #include "uci.h"
 
 // User added includes
-#include "happyhttp.h"
 #include <string>
-#include <json/reader.h>
+#include "happyhttp.h"
+#include "json/json.h"
 
 using namespace std;
 
@@ -165,6 +166,7 @@ void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* d
   //fwrite(data, 1, n, stdout);
   responseData = (char*)data;
   //printf("%s", responseData);
+  printf("%s", data);
 
 
   counted += n;
@@ -213,7 +215,12 @@ void UCI::loop(int argc, char* argv[]) {
  
     Json::Value root;   // will contains the root value after parsing.
     Json::Reader reader;
+    Json::CharReaderBuilder rbuilder;
+
+    // Trying something else
     bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+
+    //bool ok = Json::parseFromStream(rbuilder, responseData.c_str(), &root, NULL);    
 
     printf(root.get("output", "UTF-8").asString().c_str());
 
