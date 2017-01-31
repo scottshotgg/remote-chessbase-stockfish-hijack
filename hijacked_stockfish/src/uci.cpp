@@ -179,19 +179,21 @@ void OnComplete( const happyhttp::Response* r, void* userdata)
 
 void tunnelString(std::string commandToRun) {
 
-  happyhttp::Connection conn("127.0.0.1", 5000);
-  conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
+	//happyhttp::Connection conn(ip, 5000);
+	happyhttp::Connection conn("10.201.40.158", 5000);
+	//happyhttp::Connection conn("127.0.0.1", 5000);
+	conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
 
-  // Making request
-  printf("making request\n");
-  //const char* cmd = "go depth 10";
-  conn.request("PUT", "/cmd", 0, (const unsigned char*)commandToRun.c_str(), std::strlen(commandToRun.c_str()));
-  //conn.request("PUT", "/something", 0, 0, 0);
-  
-  while(conn.outstanding())
-    conn.pump();
+	// Making request
+	printf("making request\n");
+	//const char* cmd = "go depth 10";
+	conn.request("PUT", "/cmd", 0, (const unsigned char*)commandToRun.c_str(), std::strlen(commandToRun.c_str()));
+	//conn.request("PUT", "/something", 0, 0, 0);
 
-  //printf("This is the response: \n%s\n", responseData.c_str());
+	while(conn.outstanding())
+		conn.pump();
+
+	//printf("This is the response: \n%s\n", responseData.c_str());
 
 }
 
@@ -205,12 +207,17 @@ void UCI::loop(int argc, char* argv[]) {
   for (int i = 1; i < argc; ++i)
       cmd += std::string(argv[i]) + " ";
     
+  //char* address = argv[1];
+
+  //cout << "address" << address;
+
   do {  
     if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
             cmd = "quit";
 
     // Change this to a network write later  
     cout << std::string(cmd);
+
     tunnelString(cmd);
  
     Json::Value root;   // will contains the root value after parsing.

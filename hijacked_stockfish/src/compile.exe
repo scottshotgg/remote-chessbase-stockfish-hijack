@@ -1,1 +1,2 @@
+make clean
 make build ARCH=x86-64 COMP=clang -j 10
