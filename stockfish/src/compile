@@ -2,8 +2,8 @@
 #make build ARCH=x86-64 COMP=$1 -j $2
 
 make clean
-make build ARCH=x86-64 -j 13 COMP=mingw #CXXFLAGS+="-lwsock32 -lws2_32 -o stockfish.exe"
+make build ARCH=x86-64 -j $1 COMP=mingw #CXXFLAGS+="-lwsock32 -lws2_32 -o stockfish.exe"
 mv stockfish.exe ../../executables/stockfish.exe
 make clean
-make build ARCH=x86-64-bmi2  -j 13 COMP=clang
+make build ARCH=x86-64-bmi2  -j $1 COMP=clang
 mv stockfish ../../executables/stockfish

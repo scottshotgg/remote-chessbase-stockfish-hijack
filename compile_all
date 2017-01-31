@@ -1,9 +1,22 @@
+#!/bin/bash
+
+cores=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -1)
+cores=$(expr $cores + 1)
+
+echo "Using $cores cores to compile with -j $(expr $cores + 1)"
+echo
+echo
+
 rm -rf executables
 
 go build -o executables/server server/main.go
 cd hijacked_stockfish/src/
-./compile
+./compile $(expr $cores + 1)
 cd ../../stockfish/src/
-./compile
+./compile $(expr $cores + 1)
 
+echo
+echo
 echo "***** Done compiling everything. There is now a folder at the root named 'executables' where they are all stored. *****"
+echo
+echo
