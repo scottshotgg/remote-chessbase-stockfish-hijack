@@ -167,7 +167,7 @@ endif
 
 ifeq ($(COMP),mingw)
 	comp=mingw
-
+	
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
 			ifeq ($(shell which x86_64-w64-mingw32-c++-posix),)

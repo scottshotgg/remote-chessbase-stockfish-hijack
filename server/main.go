@@ -19,12 +19,12 @@ import (
 
 // Declare some structs to hold responses and generisize the handlers
 type genericResponse struct {
-	Success bool		`json:"success"`
+	Success bool	`json:"success"`
 	Error 	string	`json:"error"`
 }
 
 type Response struct {
-	Success 	bool		`json:"success"`
+	Success 	bool	`json:"success"`
 	Output		string	`json:"output"`
 	Error 		string	`json:"error"`
 }
@@ -80,9 +80,13 @@ func getStringFromBody(body io.ReadCloser) string {
 func exe_cmd(cmd string, wg *sync.WaitGroup) string {
   fmt.Println("command is", cmd)
   // splitting head => g++ parts => rest of the command
+  //array := []string{"go", "bench", "128", "12", "13"}
 
-  out, err := exec.Command("../stockfish/src/stockfish", cmd).Output()
+	out, err := exec.Command("../stockfish/src/stockfish", cmd).CombinedOutput()
+	//stdout, err := cmd.StdoutPipe()
 	//out, err := exec.Command("./something").Output()
+
+	//log.Println(string(out))
 
   if err != nil {
     fmt.Printf("%s", err)

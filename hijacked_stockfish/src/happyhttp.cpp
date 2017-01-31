@@ -28,7 +28,7 @@
 #include "happyhttp.h"
 
 #ifndef _WIN32
-//	#include <sys/types.h>
+	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
@@ -36,7 +36,7 @@
 	#include <errno.h>
 	#include <unistd.h>
 #else
-	#include <WinSock2.h>
+	#include <winsock2.h>
 	#define vsnprintf _vsnprintf
 #endif
 

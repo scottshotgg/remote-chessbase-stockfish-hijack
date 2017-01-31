@@ -174,6 +174,8 @@ endif
 
 ifeq ($(COMP),mingw)
 	comp=mingw
+	CXXFLAGS += -lwsock32 -lws2_32 -o stockfish.exe
+	EXE = stockfish.exe
 
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
