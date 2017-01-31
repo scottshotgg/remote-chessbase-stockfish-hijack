@@ -82,7 +82,7 @@ func exe_cmd(cmd string, wg *sync.WaitGroup) string {
   // splitting head => g++ parts => rest of the command
   //array := []string{"go", "bench", "128", "12", "13"}
 
-	out, err := exec.Command("../stockfish/src/stockfish", cmd).CombinedOutput()
+	out, err := exec.Command("./stockfish", cmd).CombinedOutput()
 	//stdout, err := cmd.StdoutPipe()
 	//out, err := exec.Command("./something").Output()
 

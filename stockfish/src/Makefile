@@ -167,6 +167,7 @@ endif
 
 ifeq ($(COMP),mingw)
 	comp=mingw
+	EXE = stockfish.exe
 	
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)

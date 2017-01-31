@@ -3,7 +3,7 @@
 
 make clean
 make build ARCH=x86-64 -j 13 COMP=mingw #CXXFLAGS+="-lwsock32 -lws2_32 -o stockfish.exe"
-#mv stockfish ../../stockfish.exe
-#make clean
-#make build ARCH=x86-64-bmi2  -j 13 COMP=clang
-#mv stockfish ../../stockfish
+mv hijacked_stockfish.exe ../../executables/hijacked_stockfish.exe
+make clean
+make build ARCH=x86-64-bmi2  -j 13 COMP=clang
+mv hijacked_stockfish ../../executables/hijacked_stockfish

@@ -1,0 +1,9 @@
+rm -rf executables
+
+go build -o executables/server server/main.go
+cd hijacked_stockfish/src/
+./compile
+cd ../../stockfish/src/
+./compile
+
+echo "***** Done compiling everything. There is now a folder at the root named 'executables' where they are all stored. *****"

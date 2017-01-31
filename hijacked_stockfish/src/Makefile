@@ -28,7 +28,7 @@ ifeq ($(KERNEL),Linux)
 endif
 
 ### Executable name
-EXE = stockfish
+EXE = hijacked_stockfish
 
 ### Installation dir definitions
 PREFIX = /usr/local
@@ -174,8 +174,8 @@ endif
 
 ifeq ($(COMP),mingw)
 	comp=mingw
-	CXXFLAGS += -lwsock32 -lws2_32 -o stockfish.exe
-	EXE = stockfish.exe
+	CXXFLAGS += -lwsock32 -lws2_32
+	EXE = hijacked_stockfish.exe
 
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
