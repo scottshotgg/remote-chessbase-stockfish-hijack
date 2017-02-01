@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#LOG_FILE=compile.log
+
+#exec > $LOGFILE 2>&1
+#exec > $PIPEFILE 2>&1
+#tee $LOGFILE < $PIPEFILE &
+#TEEPID=$!
+
 # Test if they have specified the amount of cores to use, if not just pull them from proc
 if [ -z "$1" ]; then
 	cores=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -1)
@@ -22,20 +29,28 @@ go build -o executables/server server/main.go
 echo "Building the hijacked version executable"
 cd hijacked_stockfish/src/
 ./compile $(expr $cores + 1)
-mv hijacked_stockfish.exe ../../executables/hijacked_stockfish.exe
-mv hijacked_stockfish ../../executables/hijacked_stockfish
+cp -r hijacked_stockfish* ../../executables/
 
 echo "Building the official version executable"
 cd ../../stockfish/src/
 ./compile $(expr $cores + 1)
-mv stockfish.exe ../../executables/stockfish.exe
-mv stockfish ../../executables/stockfish
+cp -r stockfish* ../../executables/
+
+echo $(pwd)
+cd ../../executables
+cp *.exe ~/VirtualBox\ VMs/Folder/
 
 echo
 echo
 echo "*****"
+echo
 echo "Done compiling both releases and the server."
 echo "There is now a folder at the root named 'executables' where they are all stored."
+echo
 echo "*****"
 echo
 echo
+
+
+#exec 1>&- 2>&-
+#wait $TEEPID

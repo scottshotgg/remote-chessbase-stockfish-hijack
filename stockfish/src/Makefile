@@ -158,7 +158,7 @@ ifeq ($(COMP),gcc)
 	CXX=g++
 	CXXFLAGS += -pedantic -Wextra -Wshadow
 
-	ifeq ($(ARCH),armv7)
+	ifeq ($(ARCH),arm v7)
 		ifeq ($(OS),Android)
 			CXXFLAGS += -m$(bits)
 		endif
