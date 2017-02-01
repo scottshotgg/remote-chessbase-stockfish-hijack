@@ -17,6 +17,8 @@ cd ../../stockfish/src/
 
 echo
 echo
-echo "***** Done compiling everything. There is now a folder at the root named 'executables' where they are all stored. *****"
+echo "*****"
+echo Done compiling everything. There is now a folder at the root named 'executables' where they are all stored. \
+echo "*****"
 echo
 echo

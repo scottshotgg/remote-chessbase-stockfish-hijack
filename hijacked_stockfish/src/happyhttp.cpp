@@ -36,6 +36,7 @@
 	#include <errno.h>
 	#include <unistd.h>
 #else
+	#define WIN32
 	#include <winsock2.h>
 	#define vsnprintf _vsnprintf
 #endif
@@ -73,10 +74,11 @@ const char* GetWinsockErrorString( int err );
 
 void BailOnSocketError( const char* context )
 {
+	printf("%s", context);
 #ifdef WIN32
-
 	int e = WSAGetLastError();
 	const char* msg = GetWinsockErrorString( e );
+	printf("%s", msg);
 #else
 	const char* msg = strerror( errno );
 #endif
@@ -249,9 +251,14 @@ void Connection::setcallbacks(
 	m_UserData = userdata;
 }
 
-
 void Connection::connect()
-{
+{	
+	
+	#ifdef WIN32
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
+	#endif
+
 	in_addr* addr = atoaddr( m_Host.c_str() );
 	if( !addr )
 		throw Wobbly( "Invalid network address" );
@@ -263,10 +270,11 @@ void Connection::connect()
 	address.sin_addr.s_addr = addr->s_addr;
 
 	m_Sock = socket( AF_INET, SOCK_STREAM, 0 );
+
 	if( m_Sock < 0 )
 		BailOnSocketError( "socket()" );
 
-//	printf("Connecting to %s on port %d.\n",inet_ntoa(*addr), port);
+	printf("Connecting to %s on port %d.\n",inet_ntoa(*addr), m_Port);
 
 	if( ::connect( m_Sock, (sockaddr const*)&address, sizeof(address) ) < 0 )
 		BailOnSocketError( "connect()" );

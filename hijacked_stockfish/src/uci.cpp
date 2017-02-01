@@ -163,6 +163,7 @@ void OnBegin(const happyhttp::Response* r, void* userdata)
 
 void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* data, int n)
 {
+  printf("on data, is it me??");
   //fwrite(data, 1, n, stdout);
   responseData = (char*)data;
   //printf("%s", responseData);
@@ -181,14 +182,11 @@ void tunnelString(std::string commandToRun) {
 
 	//happyhttp::Connection conn(ip, 5000);
 	happyhttp::Connection conn("10.201.40.121", 5000);
+
 	//happyhttp::Connection conn("127.0.0.1", 5000);
 	conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
 
-	// Making request
-	printf("making request\n");
-	//const char* cmd = "go depth 10";
 	conn.request("PUT", "/cmd", 0, (const unsigned char*)commandToRun.c_str(), std::strlen(commandToRun.c_str()));
-	//conn.request("PUT", "/something", 0, 0, 0);
 
 	while(conn.outstanding())
 		conn.pump();
@@ -216,7 +214,7 @@ void UCI::loop(int argc, char* argv[]) {
             cmd = "quit";
 
     // Change this to a network write later  
-    cout << std::string(cmd);
+    cout << "this is the command" << std::string(cmd);
 
     tunnelString(cmd);
  
