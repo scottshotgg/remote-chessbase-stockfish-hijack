@@ -31,11 +31,20 @@
 #include "timeman.h"
 #include "uci.h"
 
-// User added includes
+// User added includes and defines
 #include <string>
 #include "happyhttp.h"
 #include "json/json.h"
 
+#ifdef WIN32
+  #include <winsock2.h>
+  #define vsnprintf _vsnprintf
+  WSADATA wsaData;
+#endif
+
+  // End of user added includes and defines
+
+// blehhhhhh
 using namespace std;
 
 extern void benchmark(const Position& pos, istream& is);
@@ -196,6 +205,10 @@ void tunnelString(std::string commandToRun) {
 }
 
 void UCI::loop(int argc, char* argv[]) {
+
+  #ifdef WIN32
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+  #endif
   
   Position pos;
   string token, cmd;
@@ -214,7 +227,7 @@ void UCI::loop(int argc, char* argv[]) {
             cmd = "quit";
 
     // Change this to a network write later  
-    cout << "this is the command" << std::string(cmd);
+    cout << "this is the command " << std::string(cmd);
 
     tunnelString(cmd);
  
@@ -227,7 +240,7 @@ void UCI::loop(int argc, char* argv[]) {
 
     //bool ok = Json::parseFromStream(rbuilder, responseData.c_str(), &root, NULL);    
 
-    printf(root.get("output", "UTF-8").asString().c_str());
+    printf("%s", root.get("output", "UTF-8").asString().c_str());
 
     // open a port to the golang instance and ship over the string of commands
     // might need to use a name that will go along with it incase we want to kill it remotely

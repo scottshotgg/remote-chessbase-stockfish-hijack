@@ -36,7 +36,6 @@
 	#include <errno.h>
 	#include <unistd.h>
 #else
-	#define WIN32
 	#include <winsock2.h>
 	#define vsnprintf _vsnprintf
 #endif
@@ -253,12 +252,6 @@ void Connection::setcallbacks(
 
 void Connection::connect()
 {	
-	
-	#ifdef WIN32
-		WSADATA wsaData;
-		WSAStartup(MAKEWORD(2, 2), &wsaData);
-	#endif
-
 	in_addr* addr = atoaddr( m_Host.c_str() );
 	if( !addr )
 		throw Wobbly( "Invalid network address" );

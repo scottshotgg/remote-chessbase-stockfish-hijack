@@ -1,9 +1,24 @@
-# make a thing for the cores
-#make build ARCH=x86-64 COMP=$1 -j $2
+# add the bmi2 in
 
+
+# add the bmi2 in
+
+
+### Make the Windows release ###
+echo "Making the Windows release"
 make clean
-make build ARCH=x86-64 -j $1 COMP=mingw #CXXFLAGS+="-lwsock32 -lws2_32 -o stockfish.exe"
-mv hijacked_stockfish.exe ../../executables/hijacked_stockfish.exe
+make build ARCH=x86-64 -j $1 \
+	EXE=hijacked_stockfish.exe \
+	COMP=mingw \
+	CXXFLAGS+="-lwsock32 -lws2_32 -D WIN32 -std=c++14 -Ofast -fopenmp -march=native" \
+	LDFLAGS+="-lwsock32 -lws2_32 -D WIN32 -std=c++14 -Ofast -fopenmp -march=native"
+
+
+### Make the Linux release ###
+echo "Making the Linux release"
 make clean
-make build ARCH=x86-64-bmi2  -j $1 COMP=clang
-mv hijacked_stockfish ../../executables/hijacked_stockfish
+make build ARCH=x86-64-bmi2 -j $1 \
+	EXE=hijacked_stockfish \
+	COMP=clang \
+	CXXFLAGS+="-std=c++14 -Ofast -fopenmp -march=native" \
+	LDFLAGS+="-std=c++14 -Ofast -fopenmp -march=native"

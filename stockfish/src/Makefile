@@ -28,7 +28,7 @@ ifeq ($(KERNEL),Linux)
 endif
 
 ### Executable name
-EXE = stockfish
+EXE = stock
 
 ### Installation dir definitions
 PREFIX = /usr/local
@@ -37,7 +37,13 @@ BINDIR = $(PREFIX)/bin
 ### Built-in benchmark for pgo-builds
 PGOBENCH = ./$(EXE) bench
 
+OBJDIR = windows
+
 ### Object files
+#OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
+	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
+
 OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
@@ -167,7 +173,6 @@ endif
 
 ifeq ($(COMP),mingw)
 	comp=mingw
-	EXE = stockfish.exe
 	
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
