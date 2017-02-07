@@ -35,6 +35,7 @@
 #include <string>
 #include "happyhttp.h"
 #include "json/json.h"
+#include "client.cpp"
 
 #ifdef WIN32
   #include <winsock2.h>
@@ -192,6 +193,8 @@ void tunnelString(std::string commandToRun) {
 	//happyhttp::Connection conn(ip, 5000);
 	happyhttp::Connection conn("10.201.40.121", 5000);
 
+
+
 	//happyhttp::Connection conn("127.0.0.1", 5000);
 	conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
 
@@ -203,6 +206,50 @@ void tunnelString(std::string commandToRun) {
 	//printf("This is the response: \n%s\n", responseData.c_str());
 
 }
+
+// void UCI::loop(int argc, char* argv[]) {
+
+//   #ifdef WIN32
+//     WSAStartup(MAKEWORD(2, 2), &wsaData);
+//   #endif
+  
+//   Position pos;
+//   string token, cmd;
+
+//   pos.set(StartFEN, false, &States->back(), Threads.main());
+
+//   for (int i = 1; i < argc; ++i)
+//       cmd += std::string(argv[i]) + " ";
+    
+//   //char* address = argv[1];
+
+//   //cout << "address" << address;
+
+//   do {  
+//     if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
+//             cmd = "quit";
+
+//     // Change this to a network write later  
+//     tunnelString(cmd);
+ 
+//     Json::Value root;   // will contains the root value after parsing.
+//     Json::Reader reader;
+//     Json::CharReaderBuilder rbuilder;
+
+//     // Trying something else
+//     bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+
+//     //bool ok = Json::parseFromStream(rbuilder, responseData.c_str(), &root, NULL);    
+
+//     printf("%s", root.get("output", "UTF-8").asString().c_str());
+
+//     // open a port to the golang instance and ship over the string of commands
+//     // might need to use a name that will go along with it incase we want to kill it remotely
+
+//   } while (token != "quit" && argc == 1);
+
+//   Threads.main()->wait_for_search_finished();
+// }
 
 void UCI::loop(int argc, char* argv[]) {
 
@@ -217,37 +264,43 @@ void UCI::loop(int argc, char* argv[]) {
 
   for (int i = 1; i < argc; ++i)
       cmd += std::string(argv[i]) + " ";
-    
-  //char* address = argv[1];
-
-  //cout << "address" << address;
 
   do {  
-    if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
-            cmd = "quit";
+      // Block here waiting for input or EOF
+      if (argc == 1 && !getline(cin, cmd))
+        cmd = "quit";
 
-    // Change this to a network write later  
-    cout << "this is the command " << std::string(cmd);
+      istringstream is(cmd);
+      token.clear(); // getline() could return empty or blank line
+      is >> skipws >> token;
 
-    tunnelString(cmd);
- 
-    Json::Value root;   // will contains the root value after parsing.
-    Json::Reader reader;
-    Json::CharReaderBuilder rbuilder;
+      if (token == "quit") {
+        Search::Signals.stop = true;
+        Threads.main()->start_searching(true);
+      } else {
 
-    // Trying something else
-    bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+      boost::asio::io_service io_service;
+      UDPClient client(io_service, "10.201.40.183", "6000");
 
-    //bool ok = Json::parseFromStream(rbuilder, responseData.c_str(), &root, NULL);    
+      client.send(std::string(cmd + "\n"));
 
-    printf("%s", root.get("output", "UTF-8").asString().c_str());
+      std::string returnstring;
+      while(1) {
+        std::string returnstring = client.recv();
+        if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
+          break;
+        }
+        sync_cout << returnstring << sync_endl;
+      }
+    }
 
-    // open a port to the golang instance and ship over the string of commands
-    // might need to use a name that will go along with it incase we want to kill it remotely
+    //Threads.main()->wait_for_search_finished();
+    //sync_cout << done << sync_endl;
 
   } while (token != "quit" && argc == 1);
 
   Threads.main()->wait_for_search_finished();
+  exit(0);
 }
 
 

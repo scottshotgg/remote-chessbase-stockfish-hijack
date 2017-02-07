@@ -7,6 +7,12 @@
 #tee $LOGFILE < $PIPEFILE &
 #TEEPID=$!
 
+SCRIPT_ROOT="/home/scottshotgg/Development/remote-chessbase-stockfish-hijack"
+
+# Ensure that we are in correct directory so that this file can be run from anywhere
+cd $SCRIPT_ROOT
+
+
 # Test if they have specified the amount of cores to use, if not just pull them from proc
 if [ -z "$1" ]; then
 	cores=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -1)
@@ -21,24 +27,23 @@ echo "Using $cores cores to compile with -j $(expr $cores + 1)"
 echo
 echo
 
-rm -rf executables
+rm -rf $SCRIPT_ROOT/executables/
+mkdir $SCRIPT_ROOT/executables/
 
 echo "Building the server executable"
-go build -o executables/server server/main.go
+go build -o $SCRIPT_ROOT/executables/server $SCRIPT_ROOT/server/main.go &
 
 echo "Building the hijacked version executable"
-cd hijacked_stockfish/src/
-./compile $(expr $cores + 1)
-cp -r hijacked_stockfish* ../../executables/
+cd $SCRIPT_ROOT/hijacked_stockfish/src/
+./compile $(expr $cores + 1) &
 
 echo "Building the official version executable"
-cd ../../stockfish/src/
-./compile $(expr $cores + 1)
-cp -r stockfish* ../../executables/
+cd $SCRIPT_ROOT/stockfish/src/
+./compile $(expr $cores + 1) &
 
 echo $(pwd)
-cd ../../executables
-cp *.exe ~/VirtualBox\ VMs/Folder/
+#cp *.exe ~/VirtualBox\ VMs/Folder/
+cd $SCRIPT_ROOT/executables
 
 echo
 echo

@@ -1,0 +1,2 @@
+GOOS=windows GOARCH=amd64 go build -o stockfish_tunnel.exe main.go
+mv stockfish_tunnel.exe ~/VirtualBox\ VMs/Folder

@@ -214,6 +214,11 @@ void UCI::loop(int argc, char* argv[]) {
       else
           sync_cout << "Unknown command: " << cmd << sync_endl;
 
+    // does this mess it up??
+    //Threads.main()->wait_for_search_finished();
+    
+    sync_cout << "done" << sync_endl;
+
   } while (token != "quit" && argc == 1); // Passed args have one-shot behaviour
 
   Threads.main()->wait_for_search_finished();

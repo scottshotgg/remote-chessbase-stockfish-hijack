@@ -17,5 +17,8 @@ make clean
 make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=stockfish \
 	COMP=clang \
-	CXXFLAGS+="-std=c++14 -Ofast -pthread -static -march=native" \
-	LDFLAGS+=" -std=c++14 -Ofast -lpthread -static -march=native"
+	CXXFLAGS+="-std=c++14 -Ofast -pthread -march=native" \
+	LDFLAGS+=" -std=c++14 -Ofast -lpthread -march=native"
+
+
+cp -r stockfish* ../../executables/ 

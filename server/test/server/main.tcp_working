@@ -1,0 +1,110 @@
+package main
+
+import (
+	"net"
+	"bufio"
+	"fmt"
+	"os"
+	"os/exec"
+	"io"
+	"strings"
+    "sync"
+)
+
+//var conn net.Conn = nil 
+var (
+	cmd *exec.Cmd
+	readScanner *bufio.Scanner
+	cmdWriter io.WriteCloser
+	conn net.Conn
+	wg sync.WaitGroup
+	connWriter *bufio.Writer
+	//finished chan bool
+)
+
+func WriteToCmd(str string) {
+	io.WriteString(cmdWriter, str)
+}
+
+func SetupStockFish() {
+	cmdName := "../../../stockfish/src/stockfish"
+	cmd = exec.Command(cmdName)
+
+	cmdReader, err := cmd.StdoutPipe()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+		os.Exit(1)
+	}
+
+	readScanner = bufio.NewScanner(cmdReader)
+
+	cmdWriter, err = cmd.StdinPipe()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating StdinPipe for Cmd", err)
+		os.Exit(1)
+	}
+
+	go func() { 
+		for readScanner.Scan() {
+			line := readScanner.Text()
+			fmt.Printf("LOCAL PRINT OUT | %s\n", line)
+			//linestring = string(line + "\n")
+			conn.Write([]byte(line + "\n"))
+			//connWriter.Flush()
+
+
+			// fix this in the stockfish code
+			if strings.Contains(line, "bestmove") {
+				//connWriter.Flush()
+				fmt.Println("Done")
+				//wg.Done()
+			}
+		}
+	}()
+
+	err = cmd.Start()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+		os.Exit(1)
+	}
+}
+
+func main() {
+
+	//finished = make(chan bool)
+
+	fmt.Println("Launching server...")
+	ln, _ := net.Listen("tcp", ":8081")
+	//conn, _ := ln.Accept()
+	conn, _ = ln.Accept()
+	connWriter = bufio.NewWriter(conn)
+
+	SetupStockFish()
+
+	fmt.Printf("starting...")
+	//WriteToCmd("go depth 20")
+
+	for i := 0; i < 1; i+=0 {
+		// will listen for message to process ending in newline (\n)
+		message, _ := bufio.NewReader(conn).ReadString('\n')
+		// output message received
+
+		if(strings.Compare(message, "quit") == 0) {
+     		fmt.Println("quitting...")
+     		i++
+    	}
+
+		fmt.Print("Command Received:", string(message))
+		// sample process for string received
+		//newmessage := strings.ToUpper(message)
+		// send new string back to client
+		//conn.Write([]byte(newmessage + "\n"))
+
+		//runCmd(string(message), conn)
+		wg.Add(1)
+		WriteToCmd(string(message))
+		wg.Wait()
+
+		conn.Write([]byte("stop\n"))
+	}
+}
