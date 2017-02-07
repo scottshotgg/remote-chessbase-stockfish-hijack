@@ -211,7 +211,7 @@ void UCI::loop(int argc, char* argv[]) {
   #endif
   
   Position pos;
-  string token, cmd;
+  std::string token, cmd;
 
   pos.set(StartFEN, false, &States->back(), Threads.main());
 
