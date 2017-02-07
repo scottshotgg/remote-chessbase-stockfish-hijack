@@ -36,6 +36,7 @@
 #include "happyhttp.h"
 #include "json/json.h"
 #include "client.cpp"
+#include <thread>
 
 #ifdef WIN32
   #include <winsock2.h>
@@ -203,53 +204,34 @@ void tunnelString(std::string commandToRun) {
 	while(conn.outstanding())
 		conn.pump();
 
-	//printf("This is the response: \n%s\n", responseData.c_str());
-
 }
 
-// void UCI::loop(int argc, char* argv[]) {
 
-//   #ifdef WIN32
-//     WSAStartup(MAKEWORD(2, 2), &wsaData);
-//   #endif
-  
-//   Position pos;
-//   string token, cmd;
+// ==========================================================
 
-//   pos.set(StartFEN, false, &States->back(), Threads.main());
+int quit = 0;
+int tid = 1;
 
-//   for (int i = 1; i < argc; ++i)
-//       cmd += std::string(argv[i]) + " ";
-    
-//   //char* address = argv[1];
+void beginExport(std::string cmd, int id) {
+  boost::asio::io_service io_service;
+  UDPClient client(io_service, "10.201.40.183", "6000");
 
-//   //cout << "address" << address;
+  sync_cout << client << sync_endl;
 
-//   do {  
-//     if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
-//             cmd = "quit";
+  client.send(std::string(cmd + "\n"));
 
-//     // Change this to a network write later  
-//     tunnelString(cmd);
- 
-//     Json::Value root;   // will contains the root value after parsing.
-//     Json::Reader reader;
-//     Json::CharReaderBuilder rbuilder;
+  std::string returnstring;
+  while(quit == 0) {
+    std::string returnstring = client.recv();
+    if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
+      break;
+    }
+    sync_cout << returnstring << sync_endl;
+  }
 
-//     // Trying something else
-//     bool parsingSuccessful = reader.parse(responseData.c_str(), root);
+  //sync_cout << "Thread" << id << " done!" << sync_endl;
+}
 
-//     //bool ok = Json::parseFromStream(rbuilder, responseData.c_str(), &root, NULL);    
-
-//     printf("%s", root.get("output", "UTF-8").asString().c_str());
-
-//     // open a port to the golang instance and ship over the string of commands
-//     // might need to use a name that will go along with it incase we want to kill it remotely
-
-//   } while (token != "quit" && argc == 1);
-
-//   Threads.main()->wait_for_search_finished();
-// }
 
 void UCI::loop(int argc, char* argv[]) {
 
@@ -275,116 +257,26 @@ void UCI::loop(int argc, char* argv[]) {
       is >> skipws >> token;
 
       if (token == "quit") {
+        std::thread t1(beginExport, "stop", tid);
+        quit = 1;
+        t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
+
       } else {
-
-      boost::asio::io_service io_service;
-      UDPClient client(io_service, "10.201.40.183", "6000");
-
-      client.send(std::string(cmd + "\n"));
-
-      std::string returnstring;
-      while(1) {
-        std::string returnstring = client.recv();
-        if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
-          break;
-        }
-        sync_cout << returnstring << sync_endl;
-      }
-    }
-
-    //Threads.main()->wait_for_search_finished();
-    //sync_cout << done << sync_endl;
-
+        std::thread t1(beginExport, cmd, tid);
+        //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
+        tid++;
+        t1.detach();
+      } 
   } while (token != "quit" && argc == 1);
 
-  Threads.main()->wait_for_search_finished();
-  exit(0);
-}
+  // may want to make a function like this that waits for everything
+  //waitForJoin()
 
-
-/* Hijacked function for tunneling */
-/// UCI::loop() waits for a command from stdin, parses it and calls the appropriate
-/// function. Also intercepts EOF from stdin to ensure gracefully exiting if the
-/// GUI dies unexpectedly. When called with some command line arguments, e.g. to
-/// run 'bench', once the command is executed the function returns immediately.
-/// In addition to the UCI ones, also some additional debug commands are supported.
-
-/*
- void UCI::loop(int argc, char* argv[]) {
-
-  Position pos;
-  string token, cmd;
-
-  pos.set(StartFEN, false, &States->back(), Threads.main());
-
-  for (int i = 1; i < argc; ++i)
-      cmd += std::string(argv[i]) + " ";
-
-  do {
-      if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
-          cmd = "quit";
-
-      istringstream is(cmd);
-
-      token.clear(); // getline() could return empty or blank line
-      is >> skipws >> token;
-
-      // The GUI sends 'ponderhit' to tell us to ponder on the same move the
-      // opponent has played. In case Signals.stopOnPonderhit is set we are
-      // waiting for 'ponderhit' to stop the search (for instance because we
-      // already ran out of time), otherwise we should continue searching but
-      // switching from pondering to normal search.
-      if (    token == "quit"
-          ||  token == "stop"
-          || (token == "ponderhit" && Search::Signals.stopOnPonderhit))
-      {
-          Search::Signals.stop = true;
-          Threads.main()->start_searching(true); // Could be sleeping
-      }
-      else if (token == "ponderhit")
-          Search::Limits.ponder = 0; // Switch to normal search
-
-      else if (token == "uci")
-          sync_cout << "id name " << engine_info(true)
-                    << "\n"       << Options
-                    << "\nuciok"  << sync_endl;
-
-      else if (token == "ucinewgame")
-      {
-          Search::clear();
-          Time.availableNodes = 0;
-      }
-      else if (token == "isready")    sync_cout << "readyok" << sync_endl;
-      else if (token == "go")         go(pos, is);
-      else if (token == "position")   position(pos, is);
-      else if (token == "setoption")  setoption(is);
-
-      // Additional custom non-UCI commands, useful for debugging
-      else if (token == "flip")       pos.flip();
-      else if (token == "bench")      benchmark(pos, is);
-      else if (token == "d")          sync_cout << pos << sync_endl;
-      else if (token == "eval")       sync_cout << Eval::trace(pos) << sync_endl;
-      else if (token == "perft")
-      {
-          int depth;
-          stringstream ss;
-
-          is >> depth;
-          ss << Options["Hash"]    << " "
-             << Options["Threads"] << " " << depth << " current perft";
-
-          benchmark(pos, ss);
-      }
-      else
-          sync_cout << "Unknown command: " << cmd << sync_endl;
-      
-  } while (token != "quit" && argc == 1); // Passed args have one-shot behaviour
-
+  quit = 1;
   Threads.main()->wait_for_search_finished();
 }
-*/
 
 
 /// UCI::value() converts a Value to a string suitable for use with the UCI
