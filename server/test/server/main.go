@@ -158,13 +158,14 @@ func handleUDPConnection(conn *net.UDPConn) bool {
 
 func main() {
 
-	input = make(chan string, 1)
+	input  = make(chan string, 1)
 	output = make(chan string, 10)
 	//finished = make(chan bool)
 
-	hostName := "10.201.40.183"
-    portNum := "6000"
-    service := hostName + ":" + portNum
+	//hostName := "10.201.40.183"
+    hostName := ""
+    portNum  := "6000"
+    service  := hostName + ":" + portNum
 
     udpAddr, err := net.ResolveUDPAddr("udp4", service)
 

@@ -16,7 +16,7 @@ public:
     udp::resolver resolver(io_service_);
     udp::resolver::query query(udp::v4(), host, port);
     udp::resolver::iterator iter = resolver.resolve(query);
-    endpoint_ = *iter;
+    endpoint_ = *iter; 
   }
 
   ~UDPClient()
@@ -28,22 +28,45 @@ public:
     socket_.send_to(boost::asio::buffer(msg, msg.size()), endpoint_);
   }
 
+
+  // TODO: Later change this to async_recieve_from and native_non_blocking: 
+  // http://www.boost.org/doc/libs/1_47_0/doc/html/boost_asio/reference/ip__udp/socket.html
+
+  // use boost::asio::error:
+  // http://www.boost.org/doc/libs/1_62_0/boost/asio/error.hpp
+
   std::string recv() {
     unsigned char ma[1];
     char msg[1024];
 
     try {
-        boost::system::error_code error;
-        socket_.receive_from(boost::asio::buffer(ma, 2), sender_endpoint, 0, error);
-        //printf("%d\n", ma[0]);
-        socket_.receive_from(boost::asio::buffer(msg, int(ma[0])), sender_endpoint, 0, error);
-        msg[ma[0]] = '\0';
-        //socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
-        //printf("%s\n\n", msg);
-        } 
+      boost::system::error_code error;
+
+      socket_.receive_from(boost::asio::buffer(ma, 2), sender_endpoint, 0, error);
+
+     if (error && error != boost::asio::error::message_size)
+      throw boost::system::system_error(error);
+
+    } 
     catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << "\n";
-      }
+      std::cerr << "Exception: " << e.what() << "\n";
+      return std::string("exception ma");
+    }
+
+    try {
+      boost::system::error_code error;
+
+      socket_.receive_from(boost::asio::buffer(msg, int(ma[0])), sender_endpoint, 0, error);
+      msg[ma[0]] = '\0';
+
+     if (error && error != boost::asio::error::message_size)
+      throw boost::system::system_error(error);
+
+    } 
+    catch (std::exception& e) {
+      std::cerr << "Exception: " << e.what() << "\n";
+      return std::string("exception msg");
+    }
 
     return std::string(msg);
   }
@@ -54,18 +77,3 @@ private:
   udp::endpoint endpoint_;
   udp::endpoint sender_endpoint;
 };
-
-// int main()
-// {
-//   boost::asio::io_service io_service;
-//   UDPClient client(io_service, "10.201.40.121", "6000");
-//   //UDPClient client(io_service, "127.0.0.1", "6000");
-
-//   client.send("go depth 10\n");
-
-
-//   for(int i = 0; i < 100; i++) {
-//     printf("%s\n", client.recv().c_str());
-//   }
-
-// }

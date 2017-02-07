@@ -1,24 +1,41 @@
-# add the bmi2 in for Windows
-
-
 ### Make the Windows release ###
 echo "Making the Windows release"
 make clean
-make build ARCH=x86-64 -j $1 \
-	EXE=stockfish.exe \
+make build ARCH=x86-64-bmi2 -j $1 \
+	EXE=hijacked_stockfish.exe \
 	COMP=mingw \
-	CXXFLAGS+="-std=c++14 -Ofast -march=native -static -lwsock32 -lws2_32 -D WIN32" \
-	LDFLAGS+=" -std=c++14 -Ofast -march=native -static -lwsock32 -lws2_32 -D WIN32"
+	CXXFLAGS+="\
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" \
+	LDFLAGS+="\
+		-lwsock32 \
+		-lws2_32 \
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" 
 
 
 ### Make the Linux release ###
 echo "Making the Linux release"
 make clean
 make build ARCH=x86-64-bmi2 -j $1 \
-	EXE=stockfish \
+	EXE=hijacked_stockfish \
 	COMP=clang \
-	CXXFLAGS+="-std=c++14 -Ofast -pthread -march=native" \
-	LDFLAGS+=" -std=c++14 -Ofast -lpthread -march=native"
+	CXXFLAGS+="\
+		-std=c++14 \
+		-Ofast \
+		-pthread \
+		-march=native" \
+	LDFLAGS+="\
+		-lpthread \
+		-std=c++14 \
+		-Ofast \
+		-march=native" \
 
 
 cp -r stockfish* ../../executables/ 
