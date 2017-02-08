@@ -1,0 +1,31 @@
+### Make the Windows release ###
+echo "Making the Windows release"
+#make clean
+#make build ARCH=x86-64-bmi2 -j $1 \
+	EXE=stockfish.exe \
+	COMP=mingw \
+	CXXFLAGS+="\
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" \
+	LDFLAGS+="\
+		-lwsock32 \
+		-lws2_32 \
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" 
+
+
+### Make the Linux release ###
+echo "Making the Linux release"
+make clean
+make build ARCH=x86-64-bmi2 -j $1 EXE=stockfish_standard COMP=clang CXX=clang++
+
+
+cp -r stockfish* ../../executables/ 
+
+#clang++ -Wall -Wcast-qual -fno-exceptions -fno-rtti -std=c++14 -mtune=native  -pedantic -Wextra -Wshadow -m64 -DNDEBUG -O3 -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2   -c

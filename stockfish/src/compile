@@ -1,14 +1,23 @@
-# add the bmi2 in for Windows
-
-
 ### Make the Windows release ###
 echo "Making the Windows release"
-make clean
-make build ARCH=x86-64 -j $1 \
+#make clean
+#make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=stockfish.exe \
 	COMP=mingw \
-	CXXFLAGS+="-std=c++14 -Ofast -march=native -static -lwsock32 -lws2_32 -D WIN32" \
-	LDFLAGS+=" -std=c++14 -Ofast -march=native -static -lwsock32 -lws2_32 -D WIN32"
+	CXXFLAGS+="\
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" \
+	LDFLAGS+="\
+		-lwsock32 \
+		-lws2_32 \
+		-std=c++14 \
+		-Ofast \
+		-march=native \
+		-static \
+		-D WIN32" 
 
 
 ### Make the Linux release ###
@@ -16,6 +25,17 @@ echo "Making the Linux release"
 make clean
 make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=stockfish \
-	COMP=clang \
-	CXXFLAGS+="-std=c++14 -Ofast -pthread -static -march=native" \
-	LDFLAGS+=" -std=c++14 -Ofast -lpthread -static -march=native"
+	COMP=clang  CXX=clang++ \
+	CXXFLAGS="\
+		-std=c++14 -Wall -Wcast-qual -fno-exceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
+		-Ofast \
+		-pthread \
+		-march=native" \
+	LDFLAGS+="-std=c++14 -Wall -Wcast-qual -fno-exceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 -Ofast -pthread \
+		-lpthread \
+		-std=c++14 \
+		-Ofast \
+		-march=native" \
+
+
+cp -r stockfish* ../../executables/ 

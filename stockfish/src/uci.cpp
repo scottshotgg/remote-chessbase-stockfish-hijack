@@ -169,12 +169,21 @@ void UCI::loop(int argc, char* argv[]) {
       // waiting for 'ponderhit' to stop the search (for instance because we
       // already ran out of time), otherwise we should continue searching but
       // switching from pondering to normal search.
-      if (    token == "quit"
+
+      // if(token == "halt") {
+      //   sync_cout << "Halting currently running processes..." << sync_endl;
+      //   Search::Signals.stop = true;
+      //   Threads.main()->start_searching(true);
+      //   continue;
+      // }
+
+      if (token == "quit"
           ||  token == "stop"
           || (token == "ponderhit" && Search::Signals.stopOnPonderhit))
       {
           Search::Signals.stop = true;
           Threads.main()->start_searching(true); // Could be sleeping
+          //sync_cout << "done" << sync_endl;
       }
       else if (token == "ponderhit")
           Search::Limits.ponder = 0; // Switch to normal search
@@ -213,6 +222,13 @@ void UCI::loop(int argc, char* argv[]) {
       }
       else
           sync_cout << "Unknown command: " << cmd << sync_endl;
+
+    // does this mess it up??
+    //Threads.main()->wait_for_search_finished();
+
+    //contin:;
+
+    //sync_cout << "done" << sync_endl;
 
   } while (token != "quit" && argc == 1); // Passed args have one-shot behaviour
 
