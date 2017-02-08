@@ -10,6 +10,7 @@ import (
 	"strings"
     "sync"
     "log"
+    "runtime"
 )
 
 //var conn net.Conn = nil 
@@ -32,8 +33,13 @@ func WriteToCmd(str string) {
 }
 
 func SetupStockFish() {
+	var cmdName string
+	if runtime.GOOS == "windows" {
+		cmdName = "stockfish.exe"
+	} else {
+		cmdName = "../../../stockfish/src/stockfish"
+	}
 
-	cmdName := "../../../stockfish/src/stockfish"
 	cmd = exec.Command(cmdName)
 
 	cmdReader, err := cmd.StdoutPipe()
