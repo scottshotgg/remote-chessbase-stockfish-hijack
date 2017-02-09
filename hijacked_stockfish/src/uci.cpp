@@ -227,13 +227,17 @@ int tid = 1;
 
 void beginExport(std::string cmd, int id) {
   boost::asio::io_service io_service;
-  UDPClient client(io_service, "10.201.40.183", "6000");
+  // mine
+  //UDPClient client(io_service, "10.201.40.183", "6000");
+  
+  // remote
+  UDPClient client(io_service, "10.201.40.25", "6000");
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;
   // sync_cout << client.sender_endpoint << sync_endl;
 
-  
+
 
   client.send(std::string(cmd + "\n"));
 

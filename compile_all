@@ -30,10 +30,11 @@ echo
 rm -rf $SCRIPT_ROOT/executables/
 mkdir $SCRIPT_ROOT/executables/
 
-echo "Building the server executable"
-go build -o $SCRIPT_ROOT/executables/server $SCRIPT_ROOT/server/main.go &
+echo "Building Linux server executable"
+go build -o $SCRIPT_ROOT/executables/server $SCRIPT_ROOT/server/test/server/main.go &
 
-GOOS=windows GOARCH=amd64 go build -o $SCRIPT_ROOT/executables/server.exe $SCRIPT_ROOT/server/main.go &
+echo "Building Windows server executable"
+GOOS=windows GOARCH=amd64 go build -o $SCRIPT_ROOT/executables/server.exe $SCRIPT_ROOT/server/test/server/main.go &
 
 echo "Building the hijacked version executable"
 cd $SCRIPT_ROOT/hijacked_stockfish/src/
