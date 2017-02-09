@@ -164,61 +164,6 @@ void error(const char *msg)
 }
 
 int counted = 0;
-std::string responseData;
-
-void OnBegin(const happyhttp::Response* r, void* userdata)
-{
-  printf("BEGIN (%d %s)\n", r->getstatus(), r->getreason());
-  counted = 0;
-}
-
-void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* data, int n)
-{
-  printf("on data, is it me??");
-  //fwrite(data, 1, n, stdout);
-  responseData = (char*)data;
-  //printf("%s", responseData);
-  printf("%s", data);
-
-
-  counted += n;
-}
-
-void OnComplete( const happyhttp::Response* r, void* userdata)
-{
-  printf("\nCOMPLETE (%d bytes)\n\n", counted);
-}
-
-void tunnelString(std::string commandToRun) {
-
-	//happyhttp::Connection conn(ip, 5000);
-	happyhttp::Connection conn("10.201.40.121", 5000);
-
-
-
-	//happyhttp::Connection conn("127.0.0.1", 5000);
-	conn.setcallbacks(OnBegin, OnData, OnComplete, 0);
-
-	conn.request("PUT", "/cmd", 0, (const unsigned char*)commandToRun.c_str(), std::strlen(commandToRun.c_str()));
-
-	while(conn.outstanding())
-		conn.pump();
-
-}
-
-<<<<<<< HEAD
-void UCI::loop(int argc, char* argv[]) {
-
-  #ifdef WIN32
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-  #endif
-  
-  Position pos;
-  std::string token, cmd;
-
-  pos.set(StartFEN, false, &States->back(), Threads.main());
-=======
->>>>>>> 66e6dcb2d30592097a574bfd84e6abbb4701168b
 
 // ==========================================================
 
@@ -228,10 +173,10 @@ int tid = 1;
 void beginExport(std::string cmd, int id) {
   boost::asio::io_service io_service;
   // mine
-  //UDPClient client(io_service, "10.201.40.183", "6000");
+  UDPClient client(io_service, "10.201.40.97", "6000");
   
   // remote
-  UDPClient client(io_service, "10.201.40.25", "6000");
+  //UDPClient client(io_service, "10.201.40.25", "6000");
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;

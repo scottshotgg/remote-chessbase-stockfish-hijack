@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"io"
 	"strings"
+	"strconv"
     "sync"
     "log"
     "runtime"
@@ -25,6 +26,7 @@ var (
 	//finished chan bool
 	input chan string
 	output chan string
+	cores int
 )
 
 func WriteToCmd(str string) {
@@ -37,10 +39,10 @@ func SetupStockFish() {
 	if runtime.GOOS == "windows" {
 		cmdName = "stockfish.exe"
 	} else {
-		cmdName = "../../../stockfish/src/stockfish"
+		cmdName = "./stockfish"
 	}
 
-	cmd = exec.Command(cmdName)
+	cmd = exec.Command(cmdName)//, "setoption name Threads value 12")
 
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
@@ -124,16 +126,38 @@ func handleUDPConnection(conn *net.UDPConn) bool {
          fmt.Println("Received from UDP client :  ", line)
          //WriteToCmd(line)
 
-        if(strings.Compare(line, "quit\n") == 0) {
-          fmt.Println("quitting")
-          //output <- "\n"
-          return true
-        } 
+        if(strings.Contains(line, "Threads") == true) {
+          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
+          fmt.Println("Modifying thread amount to be:", cores)
+          pieces := strings.Fields(line)
+          pieces[4] = strconv.Itoa(12)
+          fmt.Println(strings.Join(pieces, " "))
+          input <- strings.Join(pieces, " ") + "\n"
+          //input <- threadLine
 
-	     go func() {
-	         fmt.Println("sending to the channel", line)
-	         input <- line
-         }()
+        // } else if(strings.Contains(line, "Hash") == true) {
+        //   hashLine := "setoption name Hash value " + strconv.Itoa(16384)
+        //   fmt.Println("Modifying hash amount to be:", 16384)
+        //   //pieces := strings.Fields(line)
+        //   //pieces[4] = strconv.Itoa(12)
+        //   //fmt.Println(strings.Join(pieces, " "))
+        //   //input <- strings.Join(pieces, " ")
+        //   input <- hashLine
+
+        } else if(strings.Compare(line, "quit\n") == 0) {
+          fmt.Println("quitting")
+
+		} else {
+        	fmt.Println("sending to the channel", line)
+        	input <- line
+			// why is this a gofunc
+			// go func() {
+	  //       	fmt.Println("sending to the channel", line)
+	  //       	input <- line
+   //       	}()
+		}
+
+	     
 
          //fmt.Println(<-input)
 
@@ -164,12 +188,14 @@ func handleUDPConnection(conn *net.UDPConn) bool {
 
 func main() {
 
-	input  = make(chan string, 1)
+	input  = make(chan string, 10)
 	output = make(chan string, 10)
+
+	cores = runtime.NumCPU()
 	//finished = make(chan bool)
 
 	//hostName := "10.201.40.183"
-    hostName := ""
+    hostName := "10.201.40.97"
     portNum  := "6000"
     service  := hostName + ":" + portNum
 
@@ -181,6 +207,8 @@ func main() {
 	//          log.Fatal(err)
 	//  }
 
+
+
 	 // setup listener for incoming UDP connection
 	 ln, err := net.ListenUDP("udp", udpAddr)
      if err != nil {
@@ -191,7 +219,9 @@ func main() {
 
 	 fmt.Println("UDP server up and listening on port 6000")
 
-     defer ln.Close()
+    defer ln.Close()
+	input <- "setoption name Threads value " + strconv.Itoa(cores) + "\n"
+    input <- "setoption name Hash value " + strconv.Itoa(16384) + "\n"
 	SetupStockFish()
 	//cont := true
 

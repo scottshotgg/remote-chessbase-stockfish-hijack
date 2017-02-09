@@ -85,7 +85,7 @@ namespace {
   // function updates the UCI option ("name") to the given value ("value").
 
   void setoption(istringstream& is) {
-
+    sync_cout << "in the setoption function" << sync_endl;
     string token, name, value;
 
     is >> token; // Consume "name" token
@@ -102,6 +102,8 @@ namespace {
         Options[name] = value;
     else
         sync_cout << "No such option: " << name << sync_endl;
+
+    sync_cout << "done" << sync_endl;
   }
 
 
