@@ -72,7 +72,7 @@ func SetupStockFish() {
 				fmt.Println("waiting for output from command...")
 				line := readScanner.Text()
 				fmt.Printf("LOCAL PRINT OUT | %s\n", line)
-				fmt.Println(len(line))
+				//fmt.Println("line length:", len(line))
 				output <- (line)
 				fmt.Println("Done")
 			}
@@ -87,11 +87,12 @@ func SetupStockFish() {
 				//fields := strings.Fields(line)
 				//fmt.Println(len(fields))
 				//if len(fields) != 0 {
-				fmt.Println(len(message))
+				//fmt.Println("message length:", len(message))
 				var b []byte
 				b = append(b, uint8(len(message)))
 				//binary.LittleEndian.PutUint8(b, uint8(len(message)))
-				fmt.Println(b)
+				//fmt.Println("byte array:", b)
+				//fmt.Println("byte array:", []byte(message))
 		        _, err = conn.WriteToUDP(b, addr)
 		        _, err = conn.WriteToUDP(message, addr)
 					//linestring = string(line + "\n")
@@ -112,90 +113,65 @@ func SetupStockFish() {
 
 // }
 
-func handleUDPConnection(conn *net.UDPConn) bool {
+func handleUDPConnection(conn *net.UDPConn) {
 
          // here is where you want to do stuff like read or write to client
         
-        buffer := make([]byte, 1024)
-         var n int
-         var err error
-         n, addr, err = conn.ReadFromUDP(buffer)
-         line := string(buffer[:n])
 
-         fmt.Println("UDP client : ", addr)
-         fmt.Println("Received from UDP client :  ", line)
-         //WriteToCmd(line)
+        for {
+	         buffer := make([]byte, 1024)
+	         var n int
+	         var err error
+	         n, addr, err = conn.ReadFromUDP(buffer)
+	         line := string(buffer[:n])
 
-        if(strings.Contains(line, "Threads") == true) {
-          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
-          fmt.Println("Modifying thread amount to be:", cores)
-          pieces := strings.Fields(line)
-          pieces[4] = strconv.Itoa(12)
-          fmt.Println(strings.Join(pieces, " "))
-          input <- strings.Join(pieces, " ") + "\n"
-          //input <- threadLine
+	         fmt.Println("UDP client : ", addr)
+	         fmt.Println("Received from UDP client :  ", line)
+	         //WriteToCmd(line)
 
-        // } else if(strings.Contains(line, "Hash") == true) {
-        //   hashLine := "setoption name Hash value " + strconv.Itoa(16384)
-        //   fmt.Println("Modifying hash amount to be:", 16384)
-        //   //pieces := strings.Fields(line)
-        //   //pieces[4] = strconv.Itoa(12)
-        //   //fmt.Println(strings.Join(pieces, " "))
-        //   //input <- strings.Join(pieces, " ")
-        //   input <- hashLine
+	        if(strings.Contains(line, "Threads") == true) {
+	          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
+	          fmt.Println("Modifying thread amount to be:", cores)
+	          pieces := strings.Fields(line)
+	          pieces[4] = strconv.Itoa(12)
+	          fmt.Println(strings.Join(pieces, " "))
+	          input <- strings.Join(pieces, " ") + "\n"
 
-        } else if(strings.Compare(line, "quit\n") == 0) {
-          fmt.Println("quitting")
+	        } else if(strings.Contains(line, "Hash") == true) {
+	          hashLine := "setoption name Hash value " + strconv.Itoa(16384)
+	          fmt.Println("Modifying hash amount to be:", 16384)
+	          //pieces := strings.Fields(line)
+	          //pieces[4] = strconv.Itoa(12)
+	          //fmt.Println(strings.Join(pieces, " "))
+	          //input <- strings.Join(pieces, " ")
+	          input <- hashLine
 
-		} else {
-        	fmt.Println("sending to the channel", line)
-        	input <- line
-			// why is this a gofunc
-			// go func() {
-	  //       	fmt.Println("sending to the channel", line)
-	  //       	input <- line
-   //       	}()
-		}
+	        } else if(strings.Compare(line, "quit\n") == 0) {
+	          fmt.Println("quitting")
 
-	     
+			} else {
+	        	fmt.Println("sending to the channel", line)
+	        	input <- line
+			}
 
-         //fmt.Println(<-input)
-
-         if err != nil {
-                 log.Fatal(err)
-         }
-
-         // NOTE : Need to specify client address in WriteToUDP() function
-         //        otherwise, you will get this error message
-         //        write udp : write: destination address required if you use Write() function instead of WriteToUDP()
-
-         // write message back to client
-            // read in input from stdin
-         //    reader := bufio.NewReader(os.Stdin)
-         //    //fmt.Print("Text to send: ")
-         //    text, _ := reader.ReadString('\n')
-         // //message := []byte("Hello UDP client!")
-         // message := []byte(text)
-         // _, err = conn.WriteToUDP(message, addr)
-
-         // if err != nil {
-         //         log.Println(err)
-         // }
-        return true
+	         if err != nil {
+	                 log.Fatal(err)
+	         }
+       }
 
  }
 
 
 func main() {
 
-	input  = make(chan string, 10)
-	output = make(chan string, 10)
+	input  = make(chan string, 100)
+	output = make(chan string, 100)
 
 	cores = runtime.NumCPU()
 	//finished = make(chan bool)
 
 	//hostName := "10.201.40.183"
-    hostName := "10.201.40.97"
+    hostName := ""
     portNum  := "6000"
     service  := hostName + ":" + portNum
 
@@ -225,13 +201,11 @@ func main() {
 	SetupStockFish()
 	//cont := true
 
-     for {          
-         // wait for UDP client to connect
-         cont := handleUDPConnection(ln)
-         if cont != true {
-         	break
-         }
-     }
+
+    go handleUDPConnection(ln)
+
+
+    for {}
 	//conn, _ := ln.Accept()
 	//conn, _ = ln.Accept()
 	//connWriter = bufio.NewWriter(conn)

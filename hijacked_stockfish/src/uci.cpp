@@ -173,18 +173,26 @@ int tid = 1;
 void beginExport(std::string cmd, int id) {
   boost::asio::io_service io_service;
   // mine
-  UDPClient client(io_service, "10.201.40.97", "6000");
+  std::string ip = "10.201.40.97";
   
   // remote
-  //UDPClient client(io_service, "10.201.40.25", "6000");
+  //std::string ip = "10.201.40.25";
+
+  //local
+  //std::string ip = "127.0.0.1";
+  //std::string ip = "192.168.80.63";
+  UDPClient client(io_service, ip.c_str(), "6000");
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;
   // sync_cout << client.sender_endpoint << sync_endl;
 
+  //printf("Connecting to %s...", ip.c_str());
+
 
 
   client.send(std::string(cmd + "\n"));
+  //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
   while(quit == 0) {
@@ -193,6 +201,7 @@ void beginExport(std::string cmd, int id) {
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
       break;
     }
+    //printf("this is the return string: %s", returnstring.c_str());
     sync_cout << returnstring << sync_endl;
   }
 

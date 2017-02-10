@@ -1526,7 +1526,7 @@ string UCI::pv(const Position& pos, Depth depth, Value alpha, Value beta) {
       v = tb ? TB::Score : v;
 
       if (ss.rdbuf()->in_avail()) // Not at first line
-          ss << "\n";
+          ss << "\r\n";
 
       ss << "info"
          << " depth "    << d / ONE_PLY

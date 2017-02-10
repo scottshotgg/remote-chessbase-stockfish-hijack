@@ -51,8 +51,8 @@ OBJDIR = windows
 
 OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o \
-	happyhttp.o jsoncpp.o
+	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
+	#happyhttp.o jsoncpp.o
 
 vpath %.c src
 vpath %.h src
@@ -187,10 +187,10 @@ ifeq ($(COMP),mingw)
 
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
-			ifeq ($(shell which x86_64-w64-mingw32-c++-posix),)
-				CXX=x86_64-w64-mingw32-c++
+			ifeq ($(shell which x86_64-w64-mingw32-g++-posix),)
+				CXX=x86_64-w64-mingw32-g++
 			else
-				CXX=x86_64-w64-mingw32-c++-posix
+				CXX=x86_64-w64-mingw32-g++-posix
 			endif
 		else
 			ifeq ($(shell which i686-w64-mingw32-c++-posix),)

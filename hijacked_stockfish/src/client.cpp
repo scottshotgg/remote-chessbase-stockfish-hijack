@@ -42,30 +42,39 @@ public:
     try {
       boost::system::error_code error;
 
-      socket_.receive_from(boost::asio::buffer(ma, 2), sender_endpoint, 0, error);
+      socket_.receive_from(boost::asio::buffer(ma, 1), sender_endpoint, 0, error);
+      //printf("AMOUNT: %d\n", ma[0]);
 
-     if (error && error != boost::asio::error::message_size)
-      throw boost::system::system_error(error);
-
+      if (error && error != boost::asio::error::message_size) {
+        std::cerr << "THREW AN ERROR" << std::endl;
+        throw boost::system::system_error(error);
+      }
     } 
     catch (std::exception& e) {
       std::cerr << "Exception: " << e.what() << "\n";
       return std::string("exception ma");
     }
 
-    try {
-      boost::system::error_code error;
+    if(ma[0] != 0) {
+      try {
+        boost::system::error_code error;
 
-      socket_.receive_from(boost::asio::buffer(msg, int(ma[0])), sender_endpoint, 0, error);
-      msg[ma[0]] = '\0';
+        socket_.receive_from(boost::asio::buffer(msg, ma[0]), sender_endpoint, 0, error);
+        msg[ma[0]] = '\0';
+        //printf("MESSAGE: %s\n", msg);
 
-     if (error && error != boost::asio::error::message_size)
-      throw boost::system::system_error(error);
+        if (error && error != boost::asio::error::message_size) {
+          std::cerr << "THREW AN ERROR" << std::endl;
+          throw boost::system::system_error(error);
+        }
 
-    } 
-    catch (std::exception& e) {
-      std::cerr << "Exception: " << e.what() << "\n";
-      return std::string("exception msg");
+      } 
+      catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << "\n";
+        return std::string("exception msg");
+      }
+    } else {
+      msg[0] = '\0';
     }
 
     return std::string(msg);

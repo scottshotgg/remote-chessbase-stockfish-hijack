@@ -10,27 +10,34 @@
 
 
 ### Make the Windows release ###
-echo "Making the Windows release"
-make clean
-make build ARCH=x86-64-bmi2 -j $1 \
+#echo "Making the Windows release"
+#make clean
+#make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=hijacked_stockfish.exe \
-	COMP=mingw \
+	COMP=mingw CXX=x86_64-w64-mingw32-g++-posix\
 	CXXFLAGS+="\
-		-std=c++14 \
-		-Ofast \
-		-march=native \
-		-static \
-		-D WIN32" \
-	LDFLAGS+="\
-		-lboost_system-mt \
-		-lboost_thread-mt \
 		-lwsock32 \
 		-lws2_32 \
-		-std=c++14 \
+		-lboost_system-mt \
+		-lboost_thread-mt \
+		-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
 		-Ofast \
+		-pthread \
 		-march=native \
-		-static \
-		-D WIN32" 
+		-D WIN32 \
+		-static" 
+	LDFLAGS+="\
+		-lwsock32 \
+		-lws2_32 \
+		-lboost_system-mt \
+		-lboost_thread-mt \
+		-std=c++14 -Wall -Wcast-qual -fno-exceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
+		-Ofast \
+		-lpthread \
+		-march=native \
+		-D WIN32 \
+		-static" 
+
 
 
 ### Make the Linux release ###
@@ -38,18 +45,20 @@ echo "Making the Linux release"
 make clean
 make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=hijacked_stockfish \
-	COMP=clang \
+	COMP=gcc CXX=g++ \
 	CXXFLAGS+="\
-		-std=c++14 \
+		-lboost_system \
+		-lboost_thread \
+		-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
 		-Ofast \
 		-pthread \
-		-march=native" \
+		-march=native" 
 	LDFLAGS+="\
 		-lboost_system \
 		-lboost_thread \
-		-lpthread \
-		-std=c++14 \
+		-std=c++14 -Wall -Wcast-qual -fno-exceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
 		-Ofast \
-		-march=native" \
+		-lpthread \
+		-march=native"
 
 cp -r hijacked_stockfish* ../../executables/ 
