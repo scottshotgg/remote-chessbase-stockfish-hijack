@@ -133,18 +133,18 @@ func handleUDPConnection(conn *net.UDPConn) {
 	          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
 	          fmt.Println("Modifying thread amount to be:", cores)
 	          pieces := strings.Fields(line)
-	          pieces[4] = strconv.Itoa(12)
+	          pieces[4] = strconv.Itoa(cores)
 	          fmt.Println(strings.Join(pieces, " "))
 	          input <- strings.Join(pieces, " ") + "\n"
 
-	        } else if(strings.Contains(line, "Hash") == true) {
-	          hashLine := "setoption name Hash value " + strconv.Itoa(16384)
-	          fmt.Println("Modifying hash amount to be:", 16384)
-	          //pieces := strings.Fields(line)
-	          //pieces[4] = strconv.Itoa(12)
-	          //fmt.Println(strings.Join(pieces, " "))
-	          //input <- strings.Join(pieces, " ")
-	          input <- hashLine
+	        // } else if(strings.Contains(line, "Hash") == true) {
+	        //   hashLine := "setoption name Hash value " + strconv.Itoa(16384)
+	        //   fmt.Println("Modifying hash amount to be:", 16384)
+	        //   //pieces := strings.Fields(line)
+	        //   //pieces[4] = strconv.Itoa(12)
+	        //   //fmt.Println(strings.Join(pieces, " "))
+	        //   //input <- strings.Join(pieces, " ")
+	        //   input <- hashLine
 
 	        } else if(strings.Compare(line, "quit\n") == 0) {
 	          fmt.Println("quitting")
@@ -197,7 +197,8 @@ func main() {
 
     defer ln.Close()
 	input <- "setoption name Threads value " + strconv.Itoa(cores) + "\n"
-    input <- "setoption name Hash value " + strconv.Itoa(16384) + "\n"
+	//input <- "setoption name Threads value " + strconv.Itoa(12) + "\n"
+    //input <- "setoption name Hash value " + strconv.Itoa(16384) + "\n"
 	SetupStockFish()
 	//cont := true
 

@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stdio.h>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <mutex>         
+#include <condition_variable>
+
+using boost::asio::ip::udp;
+
+class UDPClient
+{
+  public:
+    UDPClient(boost::asio::io_service& io_service, const std::string& host, const std::string& port);
+
+    ~UDPClient(void);
+
+    void send(const std::string& msg) {
+      socket_.send_to(boost::asio::buffer(msg, msg.size()), endpoint_);
+    }
+
+
+    // TODO: Later change this to async_recieve_from and native_non_blocking: 
+    // http://www.boost.org/doc/libs/1_47_0/doc/html/boost_asio/reference/ip__udp/socket.html
+
+    // use boost::asio::error:
+    // http://www.boost.org/doc/libs/1_62_0/boost/asio/error.hpp
+
+    std::string recv() {
+      unsigned char ma[1];
+      char msg[1024];
+
+      try {
+        boost::system::error_code error;
+
+        socket_.receive_from(boost::asio::buffer(ma, 1), sender_endpoint, 0, error);
+        //printf("AMOUNT: %d\n", ma[0]);
+
+        if (error && error != boost::asio::error::message_size) {
+          std::cerr << "THREW AN ERROR" << std::endl;
+          throw boost::system::system_error(error);
+        }
+      } 
+      catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << "\n";
+        return std::string("exception ma");
+      }
+
+      if(ma[0] != 0) {
+        try {
+          boost::system::error_code error;
+
+          socket_.receive_from(boost::asio::buffer(msg, ma[0]), sender_endpoint, 0, error);
+          msg[ma[0]] = '\0';
+          //printf("MESSAGE: %s\n", msg);
+
+          if (error && error != boost::asio::error::message_size) {
+            std::cerr << "THREW AN ERROR" << std::endl;
+            throw boost::system::system_error(error);
+          }
+
+        } 
+        catch (std::exception& e) {
+          std::cerr << "Exception: " << e.what() << "\n";
+          return std::string("exception msg");
+        }
+      } else {
+        msg[0] = '\0';
+      }
+
+      return std::string(msg);
+    }
+
+  private:
+    boost::asio::io_service& io_service_;
+    udp::socket socket_;
+    udp::endpoint endpoint_;
+    udp::endpoint sender_endpoint;
+
+    std::mutex mtx;             // mutex for critical section
+    std::condition_variable cv; // condition variable for critical section  
+  };

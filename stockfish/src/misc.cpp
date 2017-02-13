@@ -72,9 +72,9 @@ struct Tie: public streambuf { // MSVC requires split streambuf for cin and cout
 
   int log(int c, const char* prefix) {
 
-    static int last = '\r\n'; // Single log file
+    static int last = '\n'; // Single log file
 
-    if (last == '\r\n')
+    if (last == '\n')
         logBuf->sputn(prefix, 3);
 
     return last = logBuf->sputc((char)c);
@@ -132,7 +132,7 @@ const string engine_info(bool to_uci) {
 
   ss << (Is64Bit ? " 64" : "")
      << (HasPext ? " BMI2" : (HasPopCnt ? " POPCNT" : ""))
-     << (to_uci  ? "\r\nid author ": " by ")
+     << (to_uci  ? "\nid author ": " by ")
      << "T. Romstad, M. Costalba, J. Kiiski, G. Linscott";
 
   return ss.str();

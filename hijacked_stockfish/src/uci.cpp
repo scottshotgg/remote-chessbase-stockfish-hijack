@@ -35,7 +35,7 @@
 #include <string>
 #include "happyhttp.h"
 #include "json/json.h"
-#include "client.cpp"
+#include "client.h"
 #include <thread>
 
 #ifdef WIN32
@@ -170,18 +170,17 @@ int counted = 0;
 int quit = 0;
 int tid = 1;
 
-void beginExport(std::string cmd, int id) {
   boost::asio::io_service io_service;
   // mine
-  std::string ip = "10.201.40.97";
+  //std::string ip = "10.201.40.97";
   
   // remote
   //std::string ip = "10.201.40.25";
 
   //local
   //std::string ip = "127.0.0.1";
-  //std::string ip = "192.168.80.63";
-  UDPClient client(io_service, ip.c_str(), "6000");
+  std::string ip = "192.168.80.63";
+  UDPClient client;
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;
@@ -189,16 +188,40 @@ void beginExport(std::string cmd, int id) {
 
   //printf("Connecting to %s...", ip.c_str());
 
+void quitThread(std::string cmd, int id) {
 
+  UDPClient tempClient = UDPClient(io_service, ip.c_str(), "6000");
 
-  client.send(std::string(cmd + "\n"));
+  tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
   while(quit == 0) {
-    std::string returnstring = client.recv();
+    std::string returnstring = tempClient.Recv();
 
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
+      break;
+    }
+    //printf("this is the return string: %s", returnstring.c_str());
+    sync_cout << returnstring << sync_endl;
+  }
+
+  //sync_cout << "Thread" << id << " done!" << sync_endl;
+}
+
+
+void beginExport(std::string cmd, std::string token, int id) {
+  
+  client.Send(std::string(cmd + "\n"));
+  //printf("this is the command: %s", cmd.c_str());
+
+  std::string returnstring;
+  while(quit == 0) {
+    std::string returnstring = client.Recv();
+
+    if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e' && token != "bench") {
+      break;
+    } else if(returnstring[0] == 'b' && returnstring[1] == 'd' && returnstring[2] == 'o' && returnstring[3] == 'n' && returnstring[4] == 'e' && token == "bench") {
       break;
     }
     //printf("this is the return string: %s", returnstring.c_str());
@@ -214,6 +237,8 @@ void UCI::loop(int argc, char* argv[]) {
   #ifdef WIN32
     WSAStartup(MAKEWORD(2, 2), &wsaData);
   #endif
+
+  client = UDPClient(io_service, ip.c_str(), "6000")
   
   Position pos;
   string token, cmd;
@@ -233,14 +258,14 @@ void UCI::loop(int argc, char* argv[]) {
       is >> skipws >> token;
 
       if (token == "quit") {
-        std::thread t1(beginExport, "stop", tid);
+        std::thread t1(quitThread, "stop", tid);
         quit = 1;
         t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
 
       } else {
-        std::thread t1(beginExport, cmd, tid);
+        std::thread t1(beginExport, cmd, token, tid);
         //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
         tid++;
         t1.detach();

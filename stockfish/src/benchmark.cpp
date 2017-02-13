@@ -180,4 +180,6 @@ void benchmark(const Position& current, istream& is) {
        << "\nTotal time (ms) : " << elapsed
        << "\nNodes searched  : " << nodes
        << "\nNodes/second    : " << 1000 * nodes / elapsed << endl;
+
+  sync_cout << "bdone" << sync_endl;
 }
