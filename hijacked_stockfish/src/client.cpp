@@ -6,13 +6,17 @@
     
 
 UDPClient::UDPClient() {
+	this->io_service_ = NULL;
+	this->socket_ = NULL;
+	this->endpoint = NULL;
+	this->sender_endpoint = NULL;
 
 }
 
 UDPClient::UDPClient(
 	boost::asio::io_service& io_service,
-	std::string host, 
-	std::string port) {
+	const std::string& host, 
+	const std::string& port) {
 
 	io_service_ = io_service;
 	socket_ = socket(io_service, udp::endpoint(udp::v4(), 0));
@@ -23,10 +27,13 @@ UDPClient::UDPClient(
 }
 
 UDPClient::UDPClient(const UDPClient& client) {
-	io_service_( client.io_service_ );
-	host( client.host );
-	port( client.port );
+	this->io_service = client.io_service_;
+	this->host = client.host;
+	this->port = client.port;
 }
+
+//UDPClient::UDPClient(const UDPClient& client): 
+
 
 UDPClient::~UDPClient(void) {
   socket_.close();

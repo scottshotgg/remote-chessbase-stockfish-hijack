@@ -1,0 +1,3 @@
+./executables/stockfish <<EOF
+uci
+go depth 10

@@ -167,7 +167,7 @@ func main() {
 	input  = make(chan string, 100)
 	output = make(chan string, 100)
 
-	cores = runtime.NumCPU()
+	cores = runtime.NumCPU() - 1
 	//finished = make(chan bool)
 
 	//hostName := "10.201.40.183"

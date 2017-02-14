@@ -10,9 +10,9 @@
 
 
 ### Make the Windows release ###
-echo "Making the Windows release"
-make clean
-make build ARCH=x86-64-bmi2 -j $1 \
+#echo "Making the Windows release"
+#make clean
+#make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=hijacked_stockfish.exe \
 	COMP=mingw CXX=x86_64-w64-mingw32-g++-posix\
 	CXXFLAGS+="\

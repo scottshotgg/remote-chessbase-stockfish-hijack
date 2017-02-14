@@ -200,7 +200,7 @@ void UCI::loop(int argc, char* argv[]) {
           Tablebases::init(Options["SyzygyPath"]);
           Time.availableNodes = 0;
       }
-      else if (token == "isready")    sync_cout << "readyok" << sync_endl;
+      else if (token == "isready")    sync_cout << "readyok" << sync_endl << "done" << sync_endl;
       else if (token == "go")         go(pos, is);
       else if (token == "position")   position(pos, is);
       else if (token == "setoption")  setoption(is);

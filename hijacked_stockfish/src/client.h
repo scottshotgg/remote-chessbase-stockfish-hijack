@@ -36,7 +36,4 @@ class UDPClient
     udp::socket socket_;
     udp::endpoint endpoint_;
     udp::endpoint sender_endpoint;
-
-    std::mutex mtx;             // mutex for critical section
-    std::condition_variable cv; // condition variable for critical section  
   };

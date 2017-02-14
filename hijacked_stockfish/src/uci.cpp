@@ -175,12 +175,13 @@ int tid = 1;
   //std::string ip = "10.201.40.97";
   
   // remote
-  //std::string ip = "10.201.40.25";
+  std::string ip = "10.201.40.25";
 
   //local
   //std::string ip = "127.0.0.1";
-  std::string ip = "192.168.80.63";
+  //std::string ip = "192.168.80.63";
   UDPClient client;
+  UDPClient tempClient;
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;
@@ -190,7 +191,7 @@ int tid = 1;
 
 void quitThread(std::string cmd, int id) {
 
-  UDPClient tempClient = UDPClient(io_service, ip.c_str(), "6000");
+  tempClient = UDPClient(io_service, ip.c_str(), "6000");
 
   tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
@@ -205,7 +206,6 @@ void quitThread(std::string cmd, int id) {
     //printf("this is the return string: %s", returnstring.c_str());
     sync_cout << returnstring << sync_endl;
   }
-
   //sync_cout << "Thread" << id << " done!" << sync_endl;
 }
 
@@ -238,7 +238,7 @@ void UCI::loop(int argc, char* argv[]) {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
   #endif
 
-  client = UDPClient(io_service, ip.c_str(), "6000")
+  client = UDPClient(io_service, ip.c_str(), "6000");
   
   Position pos;
   string token, cmd;
