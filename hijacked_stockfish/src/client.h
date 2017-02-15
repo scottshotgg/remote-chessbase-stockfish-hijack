@@ -12,13 +12,16 @@ class UDPClient
 
     UDPClient(boost::asio::io_service& io_service, std::string host, std::string port);
 
-    UDPClient(const UDPClient& client);
+    //UDPClient(const UDPClient& client);
 
     ~UDPClient(void);
 
     void Send(std::string msg);
 
+
     std::string Recv();
+
+    UDPClient operator=(const UDPClient&);
 
 
 

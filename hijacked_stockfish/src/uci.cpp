@@ -180,8 +180,8 @@ int tid = 1;
   //local
   //std::string ip = "127.0.0.1";
   //std::string ip = "192.168.80.63";
-  UDPClient client;
-  UDPClient tempClient;
+  //UDPClient client;
+  //UDPClient tempClient;
 
   // sync_cout << client.socket_ << sync_endl;
   // sync_cout << client.endpoint_ << sync_endl;
@@ -191,9 +191,9 @@ int tid = 1;
 
 void quitThread(std::string cmd, int id) {
 
-  tempClient = UDPClient(io_service, ip.c_str(), "6000");
+  UDPClient tempClient(io_service, ip.c_str(), "6000");
 
-  tempClient.Send(std::string(cmd + "\n"));
+  //tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
@@ -210,7 +210,7 @@ void quitThread(std::string cmd, int id) {
 }
 
 
-void beginExport(std::string cmd, std::string token, int id) {
+void beginExport(std::string cmd, std::string token, int id, UDPClient client) {
   
   client.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
@@ -238,7 +238,7 @@ void UCI::loop(int argc, char* argv[]) {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
   #endif
 
-  client = UDPClient(io_service, ip.c_str(), "6000");
+  UDPClient client(io_service, ip.c_str(), "6000");
   
   Position pos;
   string token, cmd;
@@ -265,7 +265,7 @@ void UCI::loop(int argc, char* argv[]) {
         Threads.main()->start_searching(true);
 
       } else {
-        std::thread t1(beginExport, cmd, token, tid);
+        std::thread t1(beginExport, cmd, token, tid, client);
         //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
         tid++;
         t1.detach();
