@@ -53,7 +53,8 @@ EXEOUTPUT = $(PWD)/$(EXEDIR)/$(BUILDOS)/$(EXE)
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o client.o
 
 
-SRC_FILES = $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/syzygy/*.cpp)
+SRC_FILES = $(wildcard $(SRCDIR)/*.cpp) 
+# $(SRCDIR)/syzygy/*.cpp)
 OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
 
 #vpath %.c 	src
@@ -513,7 +514,7 @@ default:
 
 
 
-all: $(EXEOUTPUT) .depend
+all: $(EXEOUTPUT) $(OBJDIR)/$(BUILDOS)%.o
 
 config-sanity:
 	@echo ""
@@ -556,11 +557,15 @@ config-sanity:
 
 
 # $(OBJ_FILES): $(SRC_FILES)
-# 	$(CXX) $(CXXFLAGS) -o $(OBJ_FILES) -c $(LDFLAGS) $(SRC_FILES)
+# 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) 
+
+#$(OBJDIR)/$(BUILDOS)/%.o: $(SRCDIR)/%.c
+#	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 
-# $(EXE): $(OBJS)
-# 	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+$(OBJDIR)/$(BUILDOS)%.o: $(SRCDIR)%.cpp 
+	$(CC) -c -o $@ $< $(CFLAGS) 
+
 
 $(EXEOUTPUT): $(OBJ_FILES)
 	$(CXX) -o $@ $(OBJ_FILES) $(LDFLAGS) 
@@ -604,8 +609,9 @@ icc-profile-clean:
 	@rm -rf profdir bench.txt
 
 .depend:
+	@echo "DEPENDS"
 	#-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS) > $@ 2> /dev/null
-	-@$(CXX) $(DEPENDFLAGS) -MM $(SRC_FILES:) > $@ 2> /dev/null
+	@$(CXX) $(DEPENDFLAGS) -MM $(SRC_FILES) > $@ 2> /dev/null
 
 -include .depend
 
