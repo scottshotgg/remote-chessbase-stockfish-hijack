@@ -28,7 +28,7 @@ ifeq ($(KERNEL),Linux)
 endif
 
 ### Executable name
-EXE = stock
+#EXE = 
 
 ### Installation dir definitions
 PREFIX = /usr/local
@@ -37,25 +37,35 @@ BINDIR = $(PREFIX)/bin
 ### Built-in benchmark for pgo-builds
 PGOBENCH = ./$(EXE) bench
 
-OBJDIR = windows
+#OBJDIR = windows
 
-### Object files
+
+OBJDIR = obj
+SRCDIR = src
+#EXEDIR = bin/$(0S)
+EXEDIR = bin
+
+EXEOUTPUT = $(PWD)/$(EXEDIR)/$(BUILDOS)/$(EXE)
+#EXEOUTPUT = $(EXE)
+#EXEOUTPUT = /home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project/bin/windows/$(EXE)
 #OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
+	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o client.o
 
-#OBJS = $(addprefix $(OBJDIR)/, benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
-	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o \
-	happyhttp.o jsoncpp.o)
 
-OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
-	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
-	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o
-	#happyhttp.o jsoncpp.o
+SRC_FILES = $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/syzygy/*.cpp)
+OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
 
-vpath %.c src
-vpath %.h src
+#vpath %.c 	src
+#vpath %.cpp src
+#vpath %.h 	src
+
+# $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+# 	$(CC) $(OPTS) -c $< -o $@
+
+#$(OBJDIR)/%.o: %.cpp
+#	$(CC) $(OPTS) -c $< -o $@
+
 
 ### ==========================================================================
 ### Section 2. High-level Configuration
@@ -155,9 +165,9 @@ endif
 ### 3.1 Selecting compiler (default = gcc)
 
 # changing this to enable exceptions for happyhttp, this works
-#CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -fno-rtti -std=c++11 $(EXTRACXXFLAGS)
-CXXFLAGS += -Wall -Wcast-qual -fno-rtti -std=c++11 $(EXTRACXXFLAGS)
-DEPENDFLAGS += -std=c++11
+#CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -fno-rtti -std=c++14 $(EXTRACXXFLAGS)
+CXXFLAGS += -Wall -Wcast-qual -fno-rtti -std=c++14 $(EXTRACXXFLAGS)
+DEPENDFLAGS += -std=c++14
 LDFLAGS += $(EXTRALDFLAGS)
 
 ifeq ($(COMP),)
@@ -473,8 +483,26 @@ install:
 	-cp $(EXE) $(BINDIR)
 	-strip $(BINDIR)/$(EXE)
 
+# might need to change this to have the syzygy folder included
 clean:
-	$(RM) $(EXE) $(EXE).exe *.o .depend *~ core bench.txt *.gcda ./syzygy/*.o ./syzygy/*.gcda
+	#$(RM) $(addprefix $(EXEDIR), $(EXE) $(EXE).exe) $(OBJDIR)/* $(addprefix $(OBJDIR), .depend *~ core bench.txt *.gcda syzygy/*.o syzygy/*.o ./syzygy/*.gcda)
+	$(RM) $(addprefix $(OBJDIR)/, windows/* linux/*) $(addprefix $(SRCDIR)/, .depend *~ core bench.txt *.gcda) $(addprefix $(EXEDIR)/, windows/* linux/*)
+
+# change to this stuff later
+# #clean all
+# clean: objclean profileclean
+# 	@rm -f .depend *~ core 
+
+# # clean binaries and objects
+# objclean:
+# 	@rm -f $(EXE) $(EXE).exe *.o ./syzygy/*.o
+
+# # clean auxiliary profiling files
+# profileclean:
+# 	@rm -rf profdir
+# 	@rm -f bench.txt *.gcda ./syzygy/*.gcda *.gcno ./syzygy/*.gcno
+# 	@rm -f stockfish.profdata *.profraw
+
 
 default:
 	help
@@ -483,9 +511,16 @@ default:
 ### Section 5. Private targets
 ### ==========================================================================
 
-all: $(EXE) .depend
+
+
+all: $(EXEOUTPUT) .depend
 
 config-sanity:
+	@echo ""
+	@echo "Using CPP_FILES: '$(SRC_FILES)'"
+	@echo ""
+	@echo "Using OBJ_FILES: '$(OBJ_FILES)'"
+	@echo ""
 	@echo ""
 	@echo "Config:"
 	@echo "debug: '$(debug)'"
@@ -494,6 +529,7 @@ config-sanity:
 	@echo "bits: '$(bits)'"
 	@echo "kernel: '$(KERNEL)'"
 	@echo "os: '$(OS)'"
+	@echo "build os: '$(BUILDOS)'"
 	@echo "prefetch: '$(prefetch)'"
 	@echo "popcnt: '$(popcnt)'"
 	@echo "sse: '$(sse)'"
@@ -503,6 +539,7 @@ config-sanity:
 	@echo "CXX: $(CXX)"
 	@echo "CXXFLAGS: $(CXXFLAGS)"
 	@echo "LDFLAGS: $(LDFLAGS)"
+	@echo "DEPENDFLAGS: $(DEPENDFLAGS)"
 	@echo ""
 	@echo "Testing config sanity. If this fails, try 'make help' ..."
 	@echo ""
@@ -517,9 +554,19 @@ config-sanity:
 	@test "$(pext)" = "yes" || test "$(pext)" = "no"
 	@test "$(comp)" = "gcc" || test "$(comp)" = "icc" || test "$(comp)" = "mingw" || test "$(comp)" = "clang"
 
-$(EXE): $(OBJS)
-	#$(CXX) "happyhttp.cpp" -o $@ $(OBJS) $(LDFLAGS)
-	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+
+# $(OBJ_FILES): $(SRC_FILES)
+# 	$(CXX) $(CXXFLAGS) -o $(OBJ_FILES) -c $(LDFLAGS) $(SRC_FILES)
+
+
+# $(EXE): $(OBJS)
+# 	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+
+$(EXEOUTPUT): $(OBJ_FILES)
+	$(CXX) -o $@ $(OBJ_FILES) $(LDFLAGS) 
+
+# $(EXEOUTPUT): $(OBJ_FILES)
+# 	$(CXX)  -c -o $@ $(LDFLAGS) $(OBJ_FILES)
 
 gcc-profile-prepare:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) gcc-profile-clean
@@ -539,7 +586,7 @@ gcc-profile-use:
 gcc-profile-clean:
 	@rm -rf *.gcda *.gcno syzygy/*.gcda syzygy/*.gcno bench.txt
 
-icc-profile-prepare:
+icc-profile-p1pare:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) icc-profile-clean
 	@mkdir profdir
 
@@ -557,7 +604,8 @@ icc-profile-clean:
 	@rm -rf profdir bench.txt
 
 .depend:
-	-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS:.o=.cpp) > $@ 2> /dev/null
+	#-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS) > $@ 2> /dev/null
+	-@$(CXX) $(DEPENDFLAGS) -MM $(SRC_FILES:) > $@ 2> /dev/null
 
 -include .depend
 

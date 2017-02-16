@@ -478,6 +478,7 @@ default:
 all: $(EXE) .depend
 
 config-sanity:
+	@echo "shit '$(OBJS:.o=.cpp)'"
 	@echo ""
 	@echo "Config:"
 	@echo "debug: '$(debug)'"

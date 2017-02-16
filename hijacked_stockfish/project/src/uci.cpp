@@ -33,8 +33,8 @@
 
 // User added includes and defines
 #include <string>
-#include "happyhttp.h"
-#include "json/json.h"
+// #include "happyhttp.h"
+// #include "json/json.h"
 #include "client.h"
 #include <thread>
 
@@ -67,103 +67,95 @@ namespace {
   // or the starting position ("startpos") and then makes the moves given in the
   // following move list ("moves").
 
-  void position(Position& pos, istringstream& is) {
+            // void position(Position& pos, istringstream& is) {
 
-    Move m;
-    string token, fen;
+            //   Move m;
+            //   string token, fen;
 
-    is >> token;
+            //   is >> token;
 
-    if (token == "startpos")
-    {
-        fen = StartFEN;
-        is >> token; // Consume "moves" token if any
-    }
-    else if (token == "fen")
-        while (is >> token && token != "moves")
-            fen += token + " ";
-    else
-        return;
+            //   if (token == "startpos")
+            //   {
+            //       fen = StartFEN;
+            //       is >> token; // Consume "moves" token if any
+            //   }
+            //   else if (token == "fen")
+            //       while (is >> token && token != "moves")
+            //           fen += token + " ";
+            //   else
+            //       return;
 
-    States = StateListPtr(new std::deque<StateInfo>(1));
-    pos.set(fen, Options["UCI_Chess960"], &States->back(), Threads.main());
+            //   States = StateListPtr(new std::deque<StateInfo>(1));
+            //   pos.set(fen, Options["UCI_Chess960"], &States->back(), Threads.main());
 
-    // Parse move list (if any)
-    while (is >> token && (m = UCI::to_move(pos, token)) != MOVE_NONE)
-    {
-        States->push_back(StateInfo());
-        pos.do_move(m, States->back(), pos.gives_check(m));
-    }
-  }
+            //   // Parse move list (if any)
+            //   while (is >> token && (m = UCI::to_move(pos, token)) != MOVE_NONE)
+            //   {
+            //       States->push_back(StateInfo());
+            //       pos.do_move(m, States->back(), pos.gives_check(m));
+            //   }
+            // }
 
 
   // setoption() is called when engine receives the "setoption" UCI command. The
   // function updates the UCI option ("name") to the given value ("value").
 
-  void setoption(istringstream& is) {
+        // void setoption(istringstream& is) {
 
-    string token, name, value;
+        //   string token, name, value;
 
-    is >> token; // Consume "name" token
+        //   is >> token; // Consume "name" token
 
-    // Read option name (can contain spaces)
-    while (is >> token && token != "value")
-        name += string(" ", name.empty() ? 0 : 1) + token;
+        //   // Read option name (can contain spaces)
+        //   while (is >> token && token != "value")
+        //       name += string(" ", name.empty() ? 0 : 1) + token;
 
-    // Read option value (can contain spaces)
-    while (is >> token)
-        value += string(" ", value.empty() ? 0 : 1) + token;
+        //   // Read option value (can contain spaces)
+        //   while (is >> token)
+        //       value += string(" ", value.empty() ? 0 : 1) + token;
 
-    if (Options.count(name))
-        Options[name] = value;
-    else
-        sync_cout << "No such option: " << name << sync_endl;
-  }
+        //   if (Options.count(name))
+        //       Options[name] = value;
+        //   else
+        //       sync_cout << "No such option: " << name << sync_endl;
+        // }
 
 
   // go() is called when engine receives the "go" UCI command. The function sets
   // the thinking time and other parameters from the input string, then starts
   // the search.
 
-  void go(Position& pos, istringstream& is) {
+        //   void go(Position& pos, istringstream& is) {
 
-    Search::LimitsType limits;
-    string token;
+        //     Search::LimitsType limits;
+        //     string token;
 
-    limits.startTime = now(); // As early as possible!
+        //     limits.startTime = now(); // As early as possible!
 
-    while (is >> token)
-        if (token == "searchmoves")
-            while (is >> token)
-                limits.searchmoves.push_back(UCI::to_move(pos, token));
+        //     while (is >> token)
+        //         if (token == "searchmoves")
+        //             while (is >> token)
+        //                 limits.searchmoves.push_back(UCI::to_move(pos, token));
 
-        else if (token == "wtime")     is >> limits.time[WHITE];
-        else if (token == "btime")     is >> limits.time[BLACK];
-        else if (token == "winc")      is >> limits.inc[WHITE];
-        else if (token == "binc")      is >> limits.inc[BLACK];
-        else if (token == "movestogo") is >> limits.movestogo;
-        else if (token == "depth")     is >> limits.depth;
-        else if (token == "nodes")     is >> limits.nodes;
-        else if (token == "movetime")  is >> limits.movetime;
-        else if (token == "mate")      is >> limits.mate;
-        else if (token == "infinite")  limits.infinite = 1;
-        else if (token == "ponder")    limits.ponder = 1;
+        //         else if (token == "wtime")     is >> limits.time[WHITE];
+        //         else if (token == "btime")     is >> limits.time[BLACK];
+        //         else if (token == "winc")      is >> limits.inc[WHITE];
+        //         else if (token == "binc")      is >> limits.inc[BLACK];
+        //         else if (token == "movestogo") is >> limits.movestogo;
+        //         else if (token == "depth")     is >> limits.depth;
+        //         else if (token == "nodes")     is >> limits.nodes;
+        //         else if (token == "movetime")  is >> limits.movetime;
+        //         else if (token == "mate")      is >> limits.mate;
+        //         else if (token == "infinite")  limits.infinite = 1;
+        //         else if (token == "ponder")    limits.ponder = 1;
 
-    Threads.start_thinking(pos, States, limits);
-  }
+        //     Threads.start_thinking(pos, States, limits);
+        //   }
 
 } // namespace
 
 
-// Simple error function
-
-void error(const char *msg)
-{
-    perror(msg);
-    exit(0);
-}
-
-int counted = 0;
+//int counted = 0;
 
 // ==========================================================
 
@@ -172,10 +164,10 @@ int tid = 1;
 
   boost::asio::io_service io_service;
   // mine
-  //std::string ip = "10.201.40.97";
+  std::string ip = "10.201.40.97";
   
   // remote
-  std::string ip = "10.201.40.25";
+  //std::string ip = "10.201.40.25";
 
   //local
   //std::string ip = "127.0.0.1";
@@ -188,8 +180,10 @@ int tid = 1;
   // sync_cout << client.sender_endpoint << sync_endl;
 
   //printf("Connecting to %s...", ip.c_str());
+  //UDPClient client(io_service, ip.c_str(), "6000");
 
-void quitThread(std::string cmd, int id) {
+//void quitThread(std::string cmd, int id) {
+void quitThread() {
 
   UDPClient tempClient(io_service, ip.c_str(), "6000");
 
@@ -198,7 +192,7 @@ void quitThread(std::string cmd, int id) {
 
   std::string returnstring;
   while(quit == 0) {
-    std::string returnstring = tempClient.Recv();
+    returnstring = tempClient.Recv();
 
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
       break;
@@ -210,14 +204,15 @@ void quitThread(std::string cmd, int id) {
 }
 
 
-void beginExport(std::string cmd, std::string token, int id, UDPClient client) {
-  
-  client.Send(std::string(cmd + "\n"));
+//void beginExport(std::string cmd, std::string token, int id, UDPClient client) {
+void beginExport(std::string cmd, std::string token, UDPClient* client) {
+
+  client->Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
   while(quit == 0) {
-    std::string returnstring = client.Recv();
+    returnstring = client->Recv();
 
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e' && token != "bench") {
       break;
@@ -258,14 +253,16 @@ void UCI::loop(int argc, char* argv[]) {
       is >> skipws >> token;
 
       if (token == "quit") {
-        std::thread t1(quitThread, "stop", tid);
+        //std::thread t1(quitThread, "stop", tid);
+        std::thread t1(quitThread);
         quit = 1;
         t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
 
       } else {
-        std::thread t1(beginExport, cmd, token, tid, client);
+        //std::thread t1(beginExport, cmd, token, tid, client);
+        std::thread t1(beginExport, cmd, token, &client);
         //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
         tid++;
         t1.detach();

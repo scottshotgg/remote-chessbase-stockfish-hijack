@@ -5,26 +5,24 @@
 #include <boost/asio.hpp>
     
 
-UDPClient::UDPClient() {
-	this->io_service_ = NULL;
-	this->socket_ = NULL;
-	this->endpoint = NULL;
-	this->sender_endpoint = NULL;
+// UDPClient::UDPClient() {
+// 	this->io_service_ = NULL;
+// 	this->socket_ = NULL;
+// 	this->endpoint = NULL;
+// 	this->sender_endpoint = NULL;
 
-}
+// }
 
 UDPClient::UDPClient(
-	boost::asio::io_service& io_service,
-	std::string& host, 
-	std::string& port) {
-
-	io_service_ = io_service;
-	socket_ = socket(io_service, udp::endpoint(udp::v4(), 0));
-    udp::resolver resolver(io_service_);
-    udp::resolver::query query(udp::v4(), host, port);
-    udp::resolver::iterator iter = resolver.resolve(query);
-    endpoint_ = *iter; 
-}
+      boost::asio::io_service& io_service, 
+      const std::string& host, 
+      const std::string& port
+    ) : io_service_(io_service), socket_(io_service, udp::endpoint(udp::v4(), 0)) {
+      udp::resolver resolver(io_service_);
+      udp::resolver::query query(udp::v4(), host, port);
+      udp::resolver::iterator iter = resolver.resolve(query);
+      endpoint_ = *iter;
+    }
 
 // //UDPClient::UDPClient(const UDPClient& client) {
 //   this->io_service = client.io_service_;
@@ -43,7 +41,7 @@ UDPClient::UDPClient(
 //UDPClient::UDPClient(const UDPClient& client): 
 
 
-UDPClient::~UDPClient(void) {
+UDPClient::~UDPClient() {
   socket_.close();
 }
 

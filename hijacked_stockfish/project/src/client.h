@@ -3,6 +3,12 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
+
+#ifndef UDPCLIENT_H
+#define UDPCLIENT_H
+#endif
+
+
 using boost::asio::ip::udp;
 
 class UDPClient
@@ -10,7 +16,11 @@ class UDPClient
   public:
     UDPClient();
 
-    UDPClient(boost::asio::io_service& io_service, std::string host, std::string port);
+    UDPClient(
+      boost::asio::io_service& io_service, 
+      const std::string& host, 
+      const std::string& port
+    );
 
     //UDPClient(const UDPClient& client);
 
@@ -21,7 +31,7 @@ class UDPClient
 
     std::string Recv();
 
-    UDPClient operator=(const UDPClient&);
+    //UDPClient operator=(const UDPClient&);
 
 
 
