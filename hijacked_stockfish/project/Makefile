@@ -57,20 +57,21 @@ EXEOUTPUT = $(PWD)/$(EXEDIR)/$(BUILDOS)/$(EXE)
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o client.o
 
 
- # SRC_FILES = $(wildcard $(SRCDIR)/*.cpp)
- # OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
- # CPP_FILES += $(wildcard $(SRCDIR)/syzygy/tbprobe.cpp)
- # OBJ_FILES += $(addprefix $(OBJDIR)/$(BUILDOS)/syzygy/, $(notdir $(SYZ_FILES:.cpp=.o)))
- # #OBJ_FILES += $(OBJDIR)/$(BUILDOS)/tbprobe.o $(OBJDIR)/$(BUILDOS)/tbprobe.o
+  SRC_FILES = $(wildcard $(SRCDIR)/*.cpp)
+  OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
+  SYZ_FILES = tbprobe.cpp
+  #SRC_FILES += $(SRCDIR)/syzygy/$(SYZ_FILES)
+  OBJ_FILES += $(addprefix $(OBJDIR)/$(BUILDOS)/syzygy/, $(SYZ_FILES:.cpp=.o))
+  #OBJ_FILES += $(OBJDIR)/$(BUILDOS)/tbprobe.o $(OBJDIR)/$(BUILDOS)/tbprobe.o
 
-OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+#OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
 	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o 
 
 # Non-native added objects
-OBJS += client.o
+#OBJS += client.o
 
-OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(OBJS))
+#OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(OBJS))
 
 #vpath %.c 	src
 #vpath %.cpp src
@@ -574,6 +575,7 @@ config-sanity:
  
 
 directories:
+	@echo $(DIRS)
 	@mkdir -p $(DIRS)
 
 $(OBJDIR)/$(BUILDOS)/%.o: $(SRCDIR)/%.cpp 
