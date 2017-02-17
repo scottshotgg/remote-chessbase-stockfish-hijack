@@ -7,7 +7,7 @@
 #		-lwsock32 \
 #		-lws2_32 \
 #		-D WIN32" 
-
+x86_64-w64-mingw32-c++-posix
 
 ### Make the Windows release ###
 echo "Making the Windows release"
@@ -41,9 +41,9 @@ make build ARCH=x86-64-bmi2 -j $1 \
 
 
 ### Make the Linux release ###
-#echo "Making the Linux release"
-#make clean
-#make build ARCH=x86-64-bmi2 -j $1 \
+echo "Making the Linux release"
+make clean
+make build ARCH=x86-64-bmi2 -j $1 \
 	EXE=stockfish \
 	COMP=gcc CXX=g++ \
 	CXXFLAGS+="\

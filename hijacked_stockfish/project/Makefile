@@ -45,6 +45,10 @@ SRCDIR = src
 #EXEDIR = bin/$(0S)
 EXEDIR = bin
 
+OSOBJDIR = $(OBJDIR)/$(BUILDOS)
+
+DIRS = $(OSOBJDIR)/syzygy
+
 EXEOUTPUT = $(PWD)/$(EXEDIR)/$(BUILDOS)/$(EXE)
 #EXEOUTPUT = $(EXE)
 #EXEOUTPUT = /home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project/bin/windows/$(EXE)
@@ -53,9 +57,20 @@ EXEOUTPUT = $(PWD)/$(EXEDIR)/$(BUILDOS)/$(EXE)
 	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o client.o
 
 
-SRC_FILES = $(wildcard $(SRCDIR)/*.cpp) 
-# $(SRCDIR)/syzygy/*.cpp)
-OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
+ # SRC_FILES = $(wildcard $(SRCDIR)/*.cpp)
+ # OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(notdir $(SRC_FILES:.cpp=.o)))
+ # CPP_FILES += $(wildcard $(SRCDIR)/syzygy/tbprobe.cpp)
+ # OBJ_FILES += $(addprefix $(OBJDIR)/$(BUILDOS)/syzygy/, $(notdir $(SYZ_FILES:.cpp=.o)))
+ # #OBJ_FILES += $(OBJDIR)/$(BUILDOS)/tbprobe.o $(OBJDIR)/$(BUILDOS)/tbprobe.o
+
+OBJS = benchmark.o bitbase.o bitboard.o endgame.o evaluate.o main.o \
+	material.o misc.o movegen.o movepick.o pawns.o position.o psqt.o \
+	search.o thread.o timeman.o tt.o uci.o ucioption.o syzygy/tbprobe.o 
+
+# Non-native added objects
+OBJS += client.o
+
+OBJ_FILES = $(addprefix $(OBJDIR)/$(BUILDOS)/, $(OBJS))
 
 #vpath %.c 	src
 #vpath %.cpp src
@@ -485,24 +500,26 @@ install:
 	-strip $(BINDIR)/$(EXE)
 
 # might need to change this to have the syzygy folder included
-clean:
-	#$(RM) $(addprefix $(EXEDIR), $(EXE) $(EXE).exe) $(OBJDIR)/* $(addprefix $(OBJDIR), .depend *~ core bench.txt *.gcda syzygy/*.o syzygy/*.o ./syzygy/*.gcda)
-	$(RM) $(addprefix $(OBJDIR)/, windows/* linux/*) $(addprefix $(SRCDIR)/, .depend *~ core bench.txt *.gcda) $(addprefix $(EXEDIR)/, windows/* linux/*)
+# clean:
+# 	#$(RM) $(addprefix $(EXEDIR), $(EXE) $(EXE).exe) $(OBJDIR)/* $(addprefix $(OBJDIR), .depend *~ core bench.txt *.gcda syzygy/*.o syzygy/*.o ./syzygy/*.gcda)
+# 	$(RM) $(addprefix $(OBJDIR)/, windows/* linux/*) $(addprefix $(SRCDIR)/, .depend *~ core bench.txt *.gcda) $(addprefix $(EXEDIR)/, windows/* linux/*) $(addprefix $(OBJDIR)/, windows/syzygy/* linux/syzygy/*)
 
-# change to this stuff later
-# #clean all
-# clean: objclean profileclean
-# 	@rm -f .depend *~ core 
+#change to this stuff later
+#clean all
+clean: execlean objclean #profileclean 
 
-# # clean binaries and objects
-# objclean:
-# 	@rm -f $(EXE) $(EXE).exe *.o ./syzygy/*.o
+execlean:
+	@rm -rf $(addprefix $(EXEDIR)/, windows/* linux/*)
 
-# # clean auxiliary profiling files
-# profileclean:
-# 	@rm -rf profdir
-# 	@rm -f bench.txt *.gcda ./syzygy/*.gcda *.gcno ./syzygy/*.gcno
-# 	@rm -f stockfish.profdata *.profraw
+# clean binaries and objects
+objclean:
+	@rm -rf  $(OBJDIR)
+
+# clean auxiliary profiling files
+profileclean:
+	@rm -rf profdir
+	@rm -f bench.txt *.gcda ./syzygy/*.gcda *.gcno ./syzygy/*.gcno
+	@rm -f stockfish.profdata *.profraw
 
 
 default:
@@ -514,7 +531,7 @@ default:
 
 
 
-all: $(EXEOUTPUT) $(OBJDIR)/$(BUILDOS)%.o
+all: directories $(EXEOUTPUT)
 
 config-sanity:
 	@echo ""
@@ -554,24 +571,18 @@ config-sanity:
 	@test "$(sse)" = "yes" || test "$(sse)" = "no"
 	@test "$(pext)" = "yes" || test "$(pext)" = "no"
 	@test "$(comp)" = "gcc" || test "$(comp)" = "icc" || test "$(comp)" = "mingw" || test "$(comp)" = "clang"
+ 
 
+directories:
+	@mkdir -p $(DIRS)
 
-# $(OBJ_FILES): $(SRC_FILES)
-# 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) 
-
-#$(OBJDIR)/$(BUILDOS)/%.o: $(SRCDIR)/%.c
-#	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
-
-
-$(OBJDIR)/$(BUILDOS)%.o: $(SRCDIR)%.cpp 
-	$(CC) -c -o $@ $< $(CFLAGS) 
+$(OBJDIR)/$(BUILDOS)/%.o: $(SRCDIR)/%.cpp 
+	$(CXX) $(DEPENDFLAGS) -c -o $@ $< $(CXXFLAGS) $(CFLAGS) 
 
 
 $(EXEOUTPUT): $(OBJ_FILES)
-	$(CXX) -o $@ $(OBJ_FILES) $(LDFLAGS) 
+	$(CXX) -o $@ $(OBJ_FILES) $(CXXFLAGS) $(LDFLAGS) 
 
-# $(EXEOUTPUT): $(OBJ_FILES)
-# 	$(CXX)  -c -o $@ $(LDFLAGS) $(OBJ_FILES)
 
 gcc-profile-prepare:
 	$(MAKE) ARCH=$(ARCH) COMP=$(COMP) gcc-profile-clean
@@ -608,10 +619,21 @@ icc-profile-use:
 icc-profile-clean:
 	@rm -rf profdir bench.txt
 
-.depend:
-	@echo "DEPENDS"
-	#-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS) > $@ 2> /dev/null
-	@$(CXX) $(DEPENDFLAGS) -MM $(SRC_FILES) > $@ 2> /dev/null
+# .depend:
+# 	@echo "DEPENDS"
+# 	#-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS) > $@ 2> /dev/null
+# 	@$(CXX) $(DEPENDFLAGS) -MM $(SRC_FILES) > $@ 2> /dev/null
 
--include .depend
+# Original, do not MODIFY
+# depend:
+# 	-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS:.o=.cpp) > $@ 2> /dev/null
+
+depend:
+	-@$(CXX) $(DEPENDFLAGS) -MM $(OBJS:.o=.cpp) > $@ 2> /dev/null
+	@echo "\"$<"\"
+	$(CXX) $(DEPENDFLAGS) -c -o $@ $< $(CFLAGS) 
+
+	#$(OBJDIR)/$(BUILDOS)%.o: $(SRCDIR)%.cpp 
+
+#-include .depend
 

@@ -1,0 +1,126 @@
+Cleaning...
+#rm -f bin.exe obj/* obj.depend obj*~ objcore objbench.txt obj*.gcda objsyzygy/*.o objsyzygy/*.o obj./syzygy/*.gcda
+rm -f obj/windows/* obj/linux/* src/.depend src/*~ src/core src/bench.txt src/*.gcda bin/windows/* bin/linux/* obj/windows/syzygy/* obj/linux/syzygy/*
+rm: cannot remove 'obj/windows/syzygy': Is a directory
+Makefile:500: recipe for target 'clean' failed
+make: *** [clean] Error 1
+Making the Windows release
+make ARCH=x86-64-bmi2 COMP=mingw config-sanity
+#rm -f binhijacked_stockfish.exe binhijacked_stockfish.exe.exe obj/* obj.depend obj*~ objcore objbench.txt obj*.gcda objsyzygy/*.o objsyzygy/*.o obj./syzygy/*.gcda
+rm -f obj/windows/* obj/linux/* src/.depend src/*~ src/core src/bench.txt src/*.gcda bin/windows/* bin/linux/* obj/windows/syzygy/* obj/linux/syzygy/*
+make[1]: Entering directory '/home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project'
+rm: cannot remove 'obj/windows/syzygy': Is a directory
+Makefile:500: recipe for target 'clean' failed
+make: *** [clean] Error 1
+make: *** Waiting for unfinished jobs....
+
+Using CPP_FILES: ''
+
+Using OBJ_FILES: 'obj/windows/benchmark.o obj/windows/bitbase.o obj/windows/bitboard.o obj/windows/endgame.o obj/windows/evaluate.o obj/windows/main.o obj/windows/material.o obj/windows/misc.o obj/windows/movegen.o obj/windows/movepick.o obj/windows/pawns.o obj/windows/position.o obj/windows/psqt.o obj/windows/search.o obj/windows/thread.o obj/windows/timeman.o obj/windows/tt.o obj/windows/uci.o obj/windows/ucioption.o obj/windows/syzygy/tbprobe.o obj/windows/client.o'
+
+
+Config:
+debug: 'no'
+optimize: 'yes'
+arch: 'x86_64'
+bits: '64'
+kernel: 'Linux'
+os: 'GNU/Linux'
+build os: 'windows'
+prefetch: 'yes'
+popcnt: 'yes'
+sse: 'yes'
+pext: 'yes'
+
+Flags:
+CXX: x86_64-w64-mingw32-g++-posix
+CXXFLAGS: -lwsock32 		-lws2_32 		-lboost_system-mt 		-lboost_thread-mt 		-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 		-Ofast 		-pthread 		-march=native 		-D WIN32 		-static
+LDFLAGS:  -static -lwsock32 		-lws2_32 		-lboost_system-mt 		-lboost_thread-mt 		-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 		-Ofast 		-pthread 		-march=native 		-D WIN32 		-static
+DEPENDFLAGS: -std=c++14 -msse
+
+Testing config sanity. If this fails, try 'make help' ...
+
+make[1]: Leaving directory '/home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project'
+make ARCH=x86-64-bmi2 COMP=mingw all
+make[1]: Entering directory '/home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project'
+"src/benchmark.cpp"
+"src/bitbase.cpp"
+# cc -c -o obj/windows/benchmark.o src/benchmark.cpp  
+# cc -c -o obj/windows/bitbase.o src/bitbase.cpp  
+"src/bitboard.cpp"
+"src/endgame.cpp"
+# cc -c -o obj/windows/bitboard.o src/bitboard.cpp  
+# cc -c -o obj/windows/endgame.o src/endgame.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/benchmark.o src/benchmark.cpp  
+"src/evaluate.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/bitbase.o src/bitbase.cpp  
+# cc -c -o obj/windows/evaluate.o src/evaluate.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/bitboard.o src/bitboard.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/endgame.o src/endgame.cpp  
+"src/main.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/evaluate.o src/evaluate.cpp  
+# cc -c -o obj/windows/main.o src/main.cpp  
+"src/material.cpp"
+# cc -c -o obj/windows/material.o src/material.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/main.o src/main.cpp  
+"src/movepick.cpp"
+# cc -c -o obj/windows/movepick.o src/movepick.cpp  
+"src/pawns.cpp"
+"src/position.cpp"
+# cc -c -o obj/windows/pawns.o src/pawns.cpp  
+# cc -c -o obj/windows/position.o src/position.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/movepick.o src/movepick.cpp  
+"src/psqt.cpp"
+# cc -c -o obj/windows/psqt.o src/psqt.cpp  
+"src/search.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/position.o src/position.cpp  
+# cc -c -o obj/windows/search.o src/search.cpp  
+"src/timeman.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/psqt.o src/psqt.cpp  
+"src/movegen.cpp"
+"src/misc.cpp"
+"src/ucioption.cpp"
+# cc -c -o obj/windows/movegen.o src/movegen.cpp  
+# cc -c -o obj/windows/misc.o src/misc.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/pawns.o src/pawns.cpp  
+# cc -c -o obj/windows/timeman.o src/timeman.cpp  
+"src/thread.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/search.o src/search.cpp  
+# cc -c -o obj/windows/thread.o src/thread.cpp  
+# cc -c -o obj/windows/ucioption.o src/ucioption.cpp  
+"src/uci.cpp"
+"src/tt.cpp"
+# cc -c -o obj/windows/uci.o src/uci.cpp  
+# cc -c -o obj/windows/tt.o src/tt.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/uci.o src/uci.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/tt.o src/tt.cpp  
+"src/client.cpp"
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/timeman.o src/timeman.cpp  
+# cc -c -o obj/windows/client.o src/client.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/thread.o src/thread.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/ucioption.o src/ucioption.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/material.o src/material.cpp  
+"src/syzygy/tbprobe.cpp"
+# cc -c -o obj/windows/syzygy/tbprobe.o src/syzygy/tbprobe.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/misc.o src/misc.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/client.o src/client.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/movegen.o src/movegen.cpp  
+x86_64-w64-mingw32-g++-posix -std=c++14 -msse -c -o obj/windows/syzygy/tbprobe.o src/syzygy/tbprobe.cpp  
+x86_64-w64-mingw32-g++-posix -o /home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project/bin/windows/hijacked_stockfish.exe obj/windows/benchmark.o obj/windows/bitbase.o obj/windows/bitboard.o obj/windows/endgame.o obj/windows/evaluate.o obj/windows/main.o obj/windows/material.o obj/windows/misc.o obj/windows/movegen.o obj/windows/movepick.o obj/windows/pawns.o obj/windows/position.o obj/windows/psqt.o obj/windows/search.o obj/windows/thread.o obj/windows/timeman.o obj/windows/tt.o obj/windows/uci.o obj/windows/ucioption.o obj/windows/syzygy/tbprobe.o obj/windows/client.o  -static -lwsock32 		-lws2_32 		-lboost_system-mt 		-lboost_thread-mt 		-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 		-Ofast 		-pthread 		-march=native 		-D WIN32 		-static 
+make[1]: Leaving directory '/home/scottshotgg/Development/remote-chessbase-stockfish-hijack/hijacked_stockfish/project'
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release
+Making the Windows release

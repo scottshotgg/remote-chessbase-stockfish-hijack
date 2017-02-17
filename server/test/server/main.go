@@ -87,7 +87,8 @@ func SetupStockFish() {
 				//fields := strings.Fields(line)
 				//fmt.Println(len(fields))
 				//if len(fields) != 0 {
-				//fmt.Println("message length:", len(message))
+				fmt.Println("message length:", len(message))
+				fmt.Println(message)
 				var b []byte
 				b = append(b, uint8(len(message)))
 				//binary.LittleEndian.PutUint8(b, uint8(len(message)))
