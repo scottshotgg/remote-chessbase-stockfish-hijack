@@ -12,6 +12,7 @@ import (
     "sync"
     "log"
     "runtime"
+    //"net/textproto"
 )
 
 //var conn net.Conn = nil 
@@ -19,10 +20,12 @@ var (
 	cmd *exec.Cmd
 	readScanner *bufio.Scanner
 	cmdWriter io.WriteCloser
-	conn *net.UDPConn
+	//conn *net.UDPConn
+	conn *net.TCPConn
 	wg sync.WaitGroup
 	connWriter *bufio.Writer
 	addr *net.UDPAddr
+	//address *net.TCPAddr
 	//finished chan bool
 	input chan string
 	output chan string
@@ -61,8 +64,8 @@ func SetupStockFish() {
 	go func() {
 		for {
 			inputLine := <-input
-			io.WriteString(cmdWriter, inputLine)
 			fmt.Println("got something from the channel: ", inputLine)
+			io.WriteString(cmdWriter, inputLine)
 		}
 	}()
 
@@ -73,7 +76,7 @@ func SetupStockFish() {
 				line := readScanner.Text()
 				fmt.Printf("LOCAL PRINT OUT | %s\n", line)
 				//fmt.Println("line length:", len(line))
-				output <- (line)
+				output <- line
 				fmt.Println("Done")
 			}
 		}
@@ -83,7 +86,7 @@ func SetupStockFish() {
 	go func() { 
 			for {
 				line := <-output
-				message := []byte(line)
+				message := []byte(line + "\n")
 				//fields := strings.Fields(line)
 				//fmt.Println(len(fields))
 				//if len(fields) != 0 {
@@ -94,8 +97,19 @@ func SetupStockFish() {
 				//binary.LittleEndian.PutUint8(b, uint8(len(message)))
 				//fmt.Println("byte array:", b)
 				//fmt.Println("byte array:", []byte(message))
-		        _, err = conn.WriteToUDP(b, addr)
-		        _, err = conn.WriteToUDP(message, addr)
+
+
+
+
+		        //	_, err = conn.WriteToUDP(b, addr)
+		        //	_, err = conn.WriteToUDP(message, addr)
+
+		        //_, err = conn.Write(b)
+		        _, err = conn.Write(message)
+
+
+
+
 					//linestring = string(line + "\n")
 					//conn.Write([]byte(line + "\n"))
 					//connWriter.Flush()
@@ -114,50 +128,57 @@ func SetupStockFish() {
 
 // }
 
-func handleUDPConnection(conn *net.UDPConn) {
+//func handleUDPConnection(conn *net.UDPConn) {
+func handleUDPConnection(conn *net.TCPConn) {
 
          // here is where you want to do stuff like read or write to client
+
+		reader := bufio.NewReader(conn)
         
 
         for {
-	         buffer := make([]byte, 1024)
-	         var n int
-	         var err error
-	         n, addr, err = conn.ReadFromUDP(buffer)
-	         line := string(buffer[:n])
-
-	         fmt.Println("UDP client : ", addr)
-	         fmt.Println("Received from UDP client :  ", line)
-	         //WriteToCmd(line)
-
-	        if(strings.Contains(line, "Threads") == true) {
-	          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
-	          fmt.Println("Modifying thread amount to be:", cores)
-	          pieces := strings.Fields(line)
-	          pieces[4] = strconv.Itoa(cores)
-	          fmt.Println(strings.Join(pieces, " "))
-	          input <- strings.Join(pieces, " ") + "\n"
-
-	        // } else if(strings.Contains(line, "Hash") == true) {
-	        //   hashLine := "setoption name Hash value " + strconv.Itoa(16384)
-	        //   fmt.Println("Modifying hash amount to be:", 16384)
-	        //   //pieces := strings.Fields(line)
-	        //   //pieces[4] = strconv.Itoa(12)
-	        //   //fmt.Println(strings.Join(pieces, " "))
-	        //   //input <- strings.Join(pieces, " ")
-	        //   input <- hashLine
-
-	        } else if(strings.Compare(line, "quit\n") == 0) {
-	          fmt.Println("quitting")
-
-			} else {
-	        	fmt.Println("sending to the channel", line)
-	        	input <- line
-			}
+	         //buffer := make([]byte, 1024)
+	         //var n int
+	         line, err := reader.ReadString('\n')
 
 	         if err != nil {
-	                 log.Fatal(err)
-	         }
+	         	if err.Error() != "EOF" {
+	            	log.Println("channel sending error: ", err)
+	         	}
+	  
+	         } else {
+
+		         //line := string(buffer[:n])
+
+		         fmt.Println("UDP client : ", addr)
+		         fmt.Println("Received from UDP client :  ", line)
+		         //WriteToCmd(line)
+
+		        if(strings.Contains(line, "Threads") == true) {
+		          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
+		          fmt.Println("Modifying thread amount to be:", cores)
+		          pieces := strings.Fields(line)
+		          pieces[4] = strconv.Itoa(cores)
+		          fmt.Println(strings.Join(pieces, " "))
+		          input <- strings.Join(pieces, " ") + "\n"
+
+		        // } else if(strings.Contains(line, "Hash") == true) {
+		        //   hashLine := "setoption name Hash value " + strconv.Itoa(16384)
+		        //   fmt.Println("Modifying hash amount to be:", 16384)
+		        //   //pieces := strings.Fields(line)
+		        //   //pieces[4] = strconv.Itoa(12)
+		        //   //fmt.Println(strings.Join(pieces, " "))
+		        //   //input <- strings.Join(pieces, " ")
+		        //   input <- hashLine
+
+		        } else if(strings.Compare(line, "quit\n") == 0) {
+		          fmt.Println("quitting")
+
+				} else {
+		        	fmt.Println("sending to the channel", line)
+		        	input <- line
+				}
+			}
        }
 
  }
@@ -172,11 +193,12 @@ func main() {
 	//finished = make(chan bool)
 
 	//hostName := "10.201.40.183"
-    hostName := ""
-    portNum  := "6000"
-    service  := hostName + ":" + portNum
+	hostName := ""
+	portNum  := "6000"
+	service  := hostName + ":" + portNum
 
-    udpAddr, err := net.ResolveUDPAddr("udp4", service)
+	//udpAddr, err := net.ResolveUDPAddr("udp4", service)
+
 
 	fmt.Println("Launching server: ", hostName, ":", portNum)
 	// ln, _ := net.Listen("tcp", ":8081")
@@ -186,28 +208,43 @@ func main() {
 
 
 
-	 // setup listener for incoming UDP connection
-	 ln, err := net.ListenUDP("udp", udpAddr)
-     if err != nil {
-             log.Fatal(err)
-     }
+	// setup listener for incoming UDP connection
+	//ln, err := net.ListenUDP("udp", udpAddr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", service)
+	ln, err := net.ListenTCP("tcp", tcpAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-     conn = ln
+	// global var, keep for now
+	//conn = ln
 
-	 fmt.Println("UDP server up and listening on port 6000")
+	//fmt.Println("UDP server up and listening on port 6000")
+	fmt.Println("TCP server up and listening on port 6000")
 
-    defer ln.Close()
+	defer ln.Close()
 	input <- "setoption name Threads value " + strconv.Itoa(cores) + "\n"
 	//input <- "setoption name Threads value " + strconv.Itoa(12) + "\n"
-    //input <- "setoption name Hash value " + strconv.Itoa(16384) + "\n"
-	SetupStockFish()
+	//input <- "setoption name Hash value " + strconv.Itoa(16384) + "\n"
 	//cont := true
 
 
-    go handleUDPConnection(ln)
+	log.Println("I am here")
 
+	for {
+		log.Println("I am here too")
+		conn, err = ln.AcceptTCP()
+		log.Println("Conenction accepted")
+			
+		SetupStockFish()
+		
+		if err == nil {
 
-    for {}
+			go handleUDPConnection(conn)
+		} else {
+			log.Println("What's going on?", err)
+		}
+	}
 	//conn, _ := ln.Accept()
 	//conn, _ = ln.Accept()
 	//connWriter = bufio.NewWriter(conn)

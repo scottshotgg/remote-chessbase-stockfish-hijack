@@ -35,8 +35,10 @@
 #include <string>
 // #include "happyhttp.h"
 // #include "json/json.h"
-#include "client.h"
+//#include "client.h"
 #include <thread>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
 
 #ifdef WIN32
   #include <winsock2.h>
@@ -162,37 +164,56 @@ namespace {
 int quit = 0;
 int tid = 1;
 
-  boost::asio::io_service io_service;
-  // mine
-  std::string ip = "10.201.40.97";
-  
-  // remote
-  //std::string ip = "10.201.40.25";
+boost::shared_ptr<boost::asio::ip::tcp::socket> connect(std::string host, int port) {
+    boost::asio::io_service ios;
+        
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
 
-  //local
-  //std::string ip = "127.0.0.1";
-  //std::string ip = "192.168.80.63";
-  //UDPClient client;
-  //UDPClient tempClient;
+      //socketPtr = boost::asio::ip::tcp::socket socket(ios);
+    boost::shared_ptr<boost::asio::ip::tcp::socket> socket(new boost::asio::ip::tcp::socket(ios));
 
-  // sync_cout << client.socket_ << sync_endl;
-  // sync_cout << client.endpoint_ << sync_endl;
-  // sync_cout << client.sender_endpoint << sync_endl;
+    (*socket).connect(endpoint);
 
-  //printf("Connecting to %s...", ip.c_str());
-  //UDPClient client(io_service, ip.c_str(), "6000");
+    return socket;
+}   
 
-//void quitThread(std::string cmd, int id) {
-void quitThread() {
+std::string read(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
+    boost::asio::streambuf buffed;
+    std::istream str(&buffed); 
+    std::string s; 
+    boost::system::error_code error;
 
-  UDPClient tempClient(io_service, ip.c_str(), "6000");
+    boost::asio::read_until((*socketPtr), buffed, "\n", error);
+    std::getline(str, s);
+    return s;
+}
 
+
+void send(std::string message, boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
+    boost::array<char, 128> buf;
+    std::copy(message.begin(),message.end(),buf.begin());
+    boost::system::error_code error;
+    (*socketPtr).write_some(boost::asio::buffer(buf, message.size()), error);
+}
+
+
+void close(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
+    (*socketPtr).close();
+}
+
+
+void quitThread(std::string cmd, int id) {
+//void quitThread() {
+
+  //UDPClient tempClient(io_service, ip.c_str(), "6000");
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
   //tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
+  send("quit\n", socketPtr);
 
   std::string returnstring;
   while(quit == 0) {
-    returnstring = tempClient.Recv();
+    returnstring = read(socketPtr);
 
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e') {
       break;
@@ -205,14 +226,15 @@ void quitThread() {
 
 
 //void beginExport(std::string cmd, std::string token, int id, UDPClient client) {
-void beginExport(std::string cmd, std::string token, UDPClient* client) {
+void beginExport(std::string cmd, std::string token, int thread_id, boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {//, UDPClient* client) {
 
-  client->Send(std::string(cmd + "\n"));
+  //client->Send(std::string(cmd + "\n"));
+  send(cmd + "\n", socketPtr);
   //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
   while(quit == 0) {
-    returnstring = client->Recv();
+    returnstring = read(socketPtr);
 
     if(returnstring[0] == 'd' && returnstring[1] == 'o' && returnstring[2] == 'n' && returnstring[3] == 'e' && token != "bench") {
       break;
@@ -223,6 +245,8 @@ void beginExport(std::string cmd, std::string token, UDPClient* client) {
     sync_cout << returnstring << sync_endl;
   }
 
+  sync_cout << "beginExport thread " << thread_id << " done" << sync_endl;
+  return;
   //sync_cout << "Thread" << id << " done!" << sync_endl;
 }
 
@@ -233,8 +257,9 @@ void UCI::loop(int argc, char* argv[]) {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
   #endif
 
-  UDPClient client(io_service, ip.c_str(), "6000");
-  
+  //UDPClient client(io_service, ip.c_str(), "6000");
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
+
   Position pos;
   string token, cmd;
 
@@ -254,18 +279,19 @@ void UCI::loop(int argc, char* argv[]) {
 
       if (token == "quit") {
         //std::thread t1(quitThread, "stop", tid);
-        std::thread t1(quitThread);
+        //std::thread t1(quitThread);
         quit = 1;
-        t1.join();
+        //t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
 
       } else {
         //std::thread t1(beginExport, cmd, token, tid, client);
-        std::thread t1(beginExport, cmd, token, &client);
+        std::thread t1(beginExport, cmd, token, tid, socketPtr);
         //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
         tid++;
         t1.detach();
+        sync_cout << "beginExport thread " << tid << " after detatched" << sync_endl;
       } 
   } while (token != "quit" && argc == 1);
 
