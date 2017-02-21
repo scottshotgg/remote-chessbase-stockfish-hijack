@@ -3,12 +3,12 @@ re='^[0-9]+$'
 if ! [[ "$1" =~ $re ]]; then
 	echo "If you want to use this script directly, you need to specify the thread count before anything else. './compile [integer] {clean}' If you would just like to clean, use 'make clean'."
 
-	if [ "$2" == 'clean' ]; then
+else
+	if [ "$2" == "clean" ]; then
 		echo "Cleaning...";
 		make clean;
 	fi
 
-else
 	echo "Making the Windows release" >> output
 	make build ARCH=x86-64-bmi2 -j $1 \
 		BUILDOS=windows \

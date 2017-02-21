@@ -191,7 +191,7 @@ std::string read(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
 
 void send(std::string message, boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
     boost::array<char, 128> buf;
-    std::copy(message.begin(),message.end(),buf.begin());
+    std::copy(message.begin(), message.end(), buf.begin());
     boost::system::error_code error;
     (*socketPtr).write_some(boost::asio::buffer(buf, message.size()), error);
 }
@@ -202,14 +202,15 @@ void close(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
 }
 
 
-void quitThread(std::string cmd, int id) {
+void quitThread(std::string cmd) {
 //void quitThread() {
 
   //UDPClient tempClient(io_service, ip.c_str(), "6000");
-  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
+  //boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.97", 6000);
   //tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
-  send("quit\n", socketPtr);
+  send(cmd + "\n", socketPtr);
 
   std::string returnstring;
   while(quit == 0) {
@@ -242,7 +243,11 @@ void beginExport(std::string cmd, std::string token, int thread_id, boost::share
       break;
     }
     //printf("this is the return string: %s", returnstring.c_str());
-    sync_cout << returnstring << sync_endl;
+
+    // Edit for shitty Windows 
+    if (returnstring != " ") {
+      sync_cout << returnstring << sync_endl;
+    }
   }
 
   sync_cout << "beginExport thread " << thread_id << " done" << sync_endl;
@@ -258,7 +263,8 @@ void UCI::loop(int argc, char* argv[]) {
   #endif
 
   //UDPClient client(io_service, ip.c_str(), "6000");
-  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
+  //boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.97", 6000);
 
   Position pos;
   string token, cmd;
@@ -279,9 +285,9 @@ void UCI::loop(int argc, char* argv[]) {
 
       if (token == "quit") {
         //std::thread t1(quitThread, "stop", tid);
-        //std::thread t1(quitThread);
+        std::thread t1(quitThread);
         quit = 1;
-        //t1.join();
+        t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
 
