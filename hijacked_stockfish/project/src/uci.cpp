@@ -39,6 +39,8 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/shared_ptr.hpp>
+#include <memory>  
 
 #ifdef WIN32
   #include <winsock2.h>
@@ -160,21 +162,47 @@ namespace {
 //int counted = 0;
 
 // ==========================================================
+#ifdef WIN32
+bool WinsockInitialized()
+{
+    SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (s == INVALID_SOCKET && WSAGetLastError() == WSANOTINITIALISED){
+        return false;
+    }
+
+    closesocket(s);
+    return true;
+}
+#endif
 
 int quit = 0;
 int tid = 1;
 
 boost::shared_ptr<boost::asio::ip::tcp::socket> connect(std::string host, int port) {
+
+    #ifdef WIN32
+      if(!WinsockInitialized()) {
+        printf("windows took a shit on your program again");
+        WSAStartup(MAKEWORD(2, 2), &wsaData);
+      }
+    
+      while(!WinsockInitialized()) {
+        printf("windows took a shit on your program again");
+        WSAStartup(MAKEWORD(2, 2), &wsaData);
+      }
+    #endif
+
+
     boost::asio::io_service ios;
         
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
 
       //socketPtr = boost::asio::ip::tcp::socket socket(ios);
-    boost::shared_ptr<boost::asio::ip::tcp::socket> socket(new boost::asio::ip::tcp::socket(ios));
+    boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr(new boost::asio::ip::tcp::socket(ios));
 
-    (*socket).connect(endpoint);
+    (*socketPtr).connect(endpoint);
 
-    return socket;
+    return socketPtr;
 }   
 
 std::string read(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
@@ -183,17 +211,52 @@ std::string read(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
     std::string s; 
     boost::system::error_code error;
 
-    boost::asio::read_until((*socketPtr), buffed, "\n", error);
+    boost::asio::read_until((*socketPtr), buffed, '\n', error);
     std::getline(str, s);
+
+    sync_cout << "\n\n***** READ ERROR *****\n" << error << "\n***** READ ERROR *****\n\n" << sync_endl; 
+    int var;
+    cin >> var;
+    //printf("Reading....\n");
+    printf(s.c_str());
+
     return s;
 }
 
 
 void send(std::string message, boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
+
     boost::array<char, 128> buf;
     std::copy(message.begin(), message.end(), buf.begin());
     boost::system::error_code error;
+    sync_cout << "\n\n***** SEND ERROR *****\n" << error << "\n***** SEND ERROR *****\n\n" << sync_endl;
     (*socketPtr).write_some(boost::asio::buffer(buf, message.size()), error);
+    sync_cout << "\"" << message << "\"" << sync_endl;
+}
+
+void send_raw() {
+
+    #ifdef WIN32
+      WSAStartup(MAKEWORD(2, 2), &wsaData);
+    #endif
+    std::string message = "uci\n";
+
+
+    boost::asio::io_service ios;
+        
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("10.201.40.178"), 6000);
+
+    boost::asio::ip::tcp::socket socket(ios);
+    boost::system::error_code error = boost::asio::error::host_not_found;
+    socket.connect(endpoint, error);
+    //boost::asio::ip::tcp::socket socket = connect("10.201.40.178", 6000);
+
+    boost::array<char, 128> buf;
+    std::copy(message.begin(), message.end(), buf.begin());
+    //boost::system::error_code error;
+    sync_cout << "\n\n***** SEND ERROR *****\n" << error << "\n***** SEND ERROR *****\n\n" << sync_endl;
+    socket.write_some(boost::asio::buffer(buf, message.size()), error);
+    sync_cout << "\"" << message << "\"" << sync_endl;
 }
 
 
@@ -203,14 +266,19 @@ void close(boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {
 
 
 void quitThread(std::string cmd) {
+
+    #ifdef WIN32
+      WSAStartup(MAKEWORD(2, 2), &wsaData);
+    #endif
 //void quitThread() {
 
   //UDPClient tempClient(io_service, ip.c_str(), "6000");
   //boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
-  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.97", 6000);
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.178", 6000);
   //tempClient.Send(std::string(cmd + "\n"));
   //printf("this is the command: %s", cmd.c_str());
   send(cmd + "\n", socketPtr);
+  //send("quit\n", socketPtr);
 
   std::string returnstring;
   while(quit == 0) {
@@ -229,8 +297,15 @@ void quitThread(std::string cmd) {
 //void beginExport(std::string cmd, std::string token, int id, UDPClient client) {
 void beginExport(std::string cmd, std::string token, int thread_id, boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr) {//, UDPClient* client) {
 
+  printf("Running the thread");
+
+    #ifdef WIN32
+      WSAStartup(MAKEWORD(2, 2), &wsaData);
+    #endif
+
   //client->Send(std::string(cmd + "\n"));
   send(cmd + "\n", socketPtr);
+  printf(string(cmd + "\n").c_str());
   //printf("this is the command: %s", cmd.c_str());
 
   std::string returnstring;
@@ -243,14 +318,17 @@ void beginExport(std::string cmd, std::string token, int thread_id, boost::share
       break;
     }
     //printf("this is the return string: %s", returnstring.c_str());
-
+    //std::string var;
+    //std::cin >> var;
     // Edit for shitty Windows 
-    if (returnstring != " ") {
-      sync_cout << returnstring << sync_endl;
+    if (returnstring != "") {
+      sync_cout << "\"" << returnstring << "\"" << sync_endl;
     }
   }
 
   sync_cout << "beginExport thread " << thread_id << " done" << sync_endl;
+  std::string var;
+  std::cin >> var;
   return;
   //sync_cout << "Thread" << id << " done!" << sync_endl;
 }
@@ -258,13 +336,17 @@ void beginExport(std::string cmd, std::string token, int thread_id, boost::share
 
 void UCI::loop(int argc, char* argv[]) {
 
+  //send_raw();
+
   #ifdef WIN32
     WSAStartup(MAKEWORD(2, 2), &wsaData);
   #endif
 
   //UDPClient client(io_service, ip.c_str(), "6000");
   //boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("127.0.0.1", 6000);
-  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.97", 6000);
+    printf("connecting...");
+  boost::shared_ptr<boost::asio::ip::tcp::socket> socketPtr = connect("10.201.40.178", 6000);
+  send("uci\n", socketPtr);
 
   Position pos;
   string token, cmd;
@@ -275,6 +357,7 @@ void UCI::loop(int argc, char* argv[]) {
       cmd += std::string(argv[i]) + " ";
 
   do {  
+      printf("waiting for input from the user");
       // Block here waiting for input or EOF
       if (argc == 1 && !getline(cin, cmd))
         cmd = "quit";
@@ -285,18 +368,18 @@ void UCI::loop(int argc, char* argv[]) {
 
       if (token == "quit") {
         //std::thread t1(quitThread, "stop", tid);
-        std::thread t1(quitThread);
+        //std::thread t1(quitThread, token);
         quit = 1;
-        t1.join();
+        //t1.join();
         Search::Signals.stop = true;
         Threads.main()->start_searching(true);
 
       } else {
         //std::thread t1(beginExport, cmd, token, tid, client);
-        std::thread t1(beginExport, cmd, token, tid, socketPtr);
+        //std::thread t1(beginExport, cmd, token, tid, socketPtr);
         //sync_cout << "Thread " << tid <<  " waiting..." << sync_endl;
         tid++;
-        t1.detach();
+        //t1.detach();
         sync_cout << "beginExport thread " << tid << " after detatched" << sync_endl;
       } 
   } while (token != "quit" && argc == 1);

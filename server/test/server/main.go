@@ -64,7 +64,8 @@ func SetupStockFish() {
 	go func() {
 		for {
 			inputLine := <-input
-			fmt.Println("got something from the channel: ", inputLine)
+			fmt.Println("got something from the channel:", inputLine)
+			fmt.Println([]byte(inputLine))
 			io.WriteString(cmdWriter, inputLine)
 		}
 	}()
@@ -90,8 +91,8 @@ func SetupStockFish() {
 				//fields := strings.Fields(line)
 				//fmt.Println(len(fields))
 				//if len(fields) != 0 {
-				fmt.Println("message length:", len(message))
-				fmt.Println(message)
+				//fmt.Println("message length:", len(message))
+				//fmt.Println(message)
 				var b []byte
 				b = append(b, uint8(len(message)))
 				//binary.LittleEndian.PutUint8(b, uint8(len(message)))
@@ -129,7 +130,7 @@ func SetupStockFish() {
 // }
 
 //func handleUDPConnection(conn *net.UDPConn) {
-func handleUDPConnection(conn *net.TCPConn) {
+func handleConnection(conn *net.TCPConn) {
 
          // here is where you want to do stuff like read or write to client
 
@@ -143,16 +144,17 @@ func handleUDPConnection(conn *net.TCPConn) {
 
 	         if err != nil {
 	         	if err.Error() != "EOF" {
-	            	log.Println("channel sending error: ", err)
+	            	log.Println("channel sending error:", err)
 	         	}
 	  
 	         } else {
 
 		         //line := string(buffer[:n])
 
-		         fmt.Println("UDP client : ", addr)
-		         fmt.Println("Received from UDP client :  ", line)
+		         fmt.Println("Client : ", addr)
+		         fmt.Println("Received from client:", line)
 		         //WriteToCmd(line)
+		         //line = strings.TrimRight(line, "\r\n")
 
 		        if(strings.Contains(line, "Threads") == true) {
 		          //threadLine := "setoption name Threads value " + strconv.Itoa(cores)
@@ -175,7 +177,7 @@ func handleUDPConnection(conn *net.TCPConn) {
 		          fmt.Println("quitting")
 
 				} else {
-		        	fmt.Println("sending to the channel", line)
+		        	fmt.Println("sending to the channel:", line)
 		        	input <- line
 				}
 			}
@@ -234,13 +236,13 @@ func main() {
 	for {
 		log.Println("I am here too")
 		conn, err = ln.AcceptTCP()
-		log.Println("Conenction accepted")
+		log.Println("Connection accepted")
 			
 		SetupStockFish()
 		
 		if err == nil {
 
-			go handleUDPConnection(conn)
+			go handleConnection(conn)
 		} else {
 			log.Println("What's going on?", err)
 		}

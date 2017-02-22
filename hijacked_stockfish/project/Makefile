@@ -583,7 +583,7 @@ $(OBJDIR)/$(BUILDOS)/%.o: $(SRCDIR)/%.cpp
 
 
 $(EXEOUTPUT): $(OBJ_FILES)
-	$(CXX) -o $@ $(OBJ_FILES) $(CXXFLAGS) $(LDFLAGS) 
+	$(CXX) -o $@ $(CXXFLAGS) $(OBJ_FILES) $(LDFLAGS) 
 
 
 gcc-profile-prepare:

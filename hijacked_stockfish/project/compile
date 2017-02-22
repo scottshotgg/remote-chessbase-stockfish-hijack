@@ -9,35 +9,9 @@ else
 		make clean;
 	fi
 
-	echo "Making the Windows release" >> output
-	make build ARCH=x86-64-bmi2 -j $1 \
-		BUILDOS=windows \
-		EXE=hijacked_stockfish.exe \
-		COMP=mingw CXX=x86_64-w64-mingw32-g++-posix\
-		CXXFLAGS+="\
-			-lwsock32 \
-			-lws2_32 \
-			-lboost_system-mt \
-			-lboost_thread-mt \
-			-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
-			-Ofast \
-			-pthread \
-			-march=native \
-			-D WIN32 \
-			-static" 
-		LDFLAGS+="\
-			-D WIN32 \
-			-lwsock32 \
-			-lws2_32 \
-			-lboost_system-mt \
-			-lboost_thread-mt \
-			-std=c++14 -Wall -Wcast-qual -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
-			-Ofast \
-			-lpthread \
-			-march=native \
-			-static"
 
 
+	### LINUX ###
 
 	# make this static - obj/linux/client.o: In function `boost::asio::detail::socket_ops::getaddrinfo(char const*, char const*, addrinfo const&, addrinfo**, boost::system::error_code&)':
 	#client.cpp:(.text._ZN5boost4asio6detail10socket_ops11getaddrinfoEPKcS4_RK8addrinfoPPS5_RNS_6system10error_codeE[_ZN5boost4asio6detail10socket_ops11getaddrinfoEPKcS4_RK8addrinfoPPS5_RNS_6system10error_codeE]+0x78): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
@@ -51,19 +25,45 @@ else
 		CXXFLAGS+="\
 			-lboost_system \
 			-lboost_thread \
-			-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3  -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
+			-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -DUSE_POPCNT -mpopcnt -DUSE_PEXT -mbmi2 \
 			-Ofast \
-			-pthread \
-			-march=native" #\
-			#-static"
+			-pthread" \
 		LDFLAGS+="\
 			-lboost_system \
 			-lboost_thread \
-			-std=c++14 -Wall -Wcast-qual -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3  -msse4 -mpopcnt -DUSE_POPCNT -DUSE_PEXT -mbmi2 \
+			-std=c++14 -Wall -Wcast-qual -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -DUSE_POPCNT -mpopcnt -DUSE_PEXT -mbmi2 \
+			-Ofast \
+			-lpthread"
+
+
+
+	### WINDOWS ###
+
+	echo "Making the Windows release" >> output
+	make build ARCH=x86-64-bmi2 -j $1 \
+		BUILDOS=windows \
+		EXE=hijacked_stockfish.exe \
+		COMP=mingw CXX=x86_64-w64-mingw32-g++-posix\
+		CXXFLAGS+="\
+			-lwsock32 \
+			-lws2_32 \
+			-D WIN32 \
+			-lboost_system-mt \
+			-lboost_thread-mt \
+			-std=c++14 -Wall -Wcast-qual -fexceptions -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -DUSE_POPCNT -mpopcnt -DUSE_PEXT -mbmi2 \
+			-Ofast \
+			-pthread \
+			-static" \
+		LDFLAGS+="\
+			-D WIN32 \
+			-lwsock32 \
+			-lws2_32 \
+			-lboost_system-mt \
+			-lboost_thread-mt \
+			-std=c++14 -Wall -Wcast-qual -fno-rtti -pedantic -Wextra -Wshadow -m64 -DNDEBUG -DIS_64BIT -msse -msse3 -msse4 -DUSE_POPCNT -mpopcnt -DUSE_PEXT -mbmi2 \
 			-Ofast \
 			-lpthread \
-			-march=native" #\
-			#-static"
+			-static"
 
 	wait
 fi
