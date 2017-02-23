@@ -21,7 +21,7 @@ else
 	make build ARCH=x86-64-bmi2 -j $1 \
 		BUILDOS=linux \
 		EXE=hijacked_stockfish \
-		COMP=gcc CXX=g++ \
+		COMP=gcc \
 		CXXFLAGS+="\
 			-lboost_system \
 			-lboost_thread \
@@ -43,7 +43,7 @@ else
 	make build ARCH=x86-64-bmi2 -j $1 \
 		BUILDOS=windows \
 		EXE=hijacked_stockfish.exe \
-		COMP=mingw CXX=x86_64-w64-mingw32-g++-posix\
+		COMP=mingw \
 		CXXFLAGS+="\
 			-lwsock32 \
 			-lws2_32 \

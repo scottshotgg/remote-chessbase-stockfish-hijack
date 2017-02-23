@@ -214,10 +214,10 @@ ifeq ($(COMP),mingw)
 
 	ifeq ($(KERNEL),Linux)
 		ifeq ($(bits),64)
-			ifeq ($(shell which x86_64-w64-mingw32-g++-posix),)
+			ifeq ($(shell which x86_64-w64-mingw32-g++),)
 				CXX=x86_64-w64-mingw32-g++
 			else
-				CXX=x86_64-w64-mingw32-g++-posix
+				CXX=x86_64-w64-mingw32-g++
 			endif
 		else
 			ifeq ($(shell which i686-w64-mingw32-c++-posix),)
